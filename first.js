@@ -5,4 +5,4 @@ function handleRequest(request, response) {
   response.end("hello world\n");
 }
 
-http.createServer(handleRequest).listen(8000);
+http.createServer(handleRequest).listen(0);
