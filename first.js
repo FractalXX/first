@@ -6,3 +6,7 @@ function handleRequest(request, response) {
 }
 
 http.createServer(handleRequest).listen(8000);
+
+app.get('/', function (req, res) {
+    res.status('200').send('Service is up');
+});
