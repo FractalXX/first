@@ -1,0 +1,21 @@
+{
+  "name": "first",
+  "version": "0.2.0",
+  "description": "nothing",
+  "main": "first.js",
+  "scripts": {
+    "start": "node first.js"
+  },
+  "engines": {
+    "node": "6.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fractalxx/first"
+  },
+  "keywords": [
+    "node",
+  ],
+  "author": "FractalXX",
+  "license": "MIT"
+}
