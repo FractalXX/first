@@ -5,10 +5,7 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 var express = require('express');
 var app = express();
-var path = require('path');
 
-app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + req.originalUrl));
-});
+app.get(/^(.+)$/, function(req, res) { res.sendfile('web/' + req.params[0])});
 
 app.listen(port, ipaddress);
