@@ -17,5 +17,8 @@
     "node"
   ],
   "author": "FractalXX",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
 }
