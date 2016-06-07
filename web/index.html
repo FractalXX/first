@@ -57,7 +57,7 @@
 				map[e.keyCode] = false;
 			}
 			
-			/*
+			
 			$(document).keydown(function(e) {
 				if (e.keyCode in map) {
 					map[e.keyCode] = true;
@@ -70,7 +70,7 @@
 				if (e.keyCode in map) {
 					map[e.keyCode] = false;
 				}
-			});*/
+			});
 			
 			function getOffset(el) {
 				el = el.getBoundingClientRect();
@@ -82,7 +82,9 @@
 
 			function gameLoop()
 			{
-				setTimeout("gameLoop()",1);
+				keyPressed();
+				keyReleased();
+				setTimeout(gameLoop,1);
 			}
 
   </script>
