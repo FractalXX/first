@@ -12,7 +12,10 @@
 
 			var height = window.innerHeight
 			|| document.documentElement.clientHeight
-			|| document.body.clientHeight;
+			|| document.body.clientHeight;	
+
+			window.addEventListener("keydown", keyPressed, false);
+			window.addEventListener("keyup", keyReleased, false);			
 
             function leftArrowPressed() {
                 var element = document.getElementById("rocket");
@@ -39,26 +42,35 @@
 				if(getOffset(element).top + rect.height >= height) return;
                 element.style.top = parseInt(element.style.top) + 5 + 'px';
             }
+			
+			var map = [];
 
-            function moveSelection(event) {                    
-                switch (event.keyCode) {
-                    case 37:
-                        leftArrowPressed();
-                    break;
-
-                    case 39:
-                        rightArrowPressed();
-                    break;
-
-                    case 38:
-                        upArrowPressed();
-                    break;
-
-                    case 40:
-                        downArrowPressed();
-                    break;
-                }
-            };
+			function keyPressed(e) {
+				map[e.keyCode] = true;
+				if (map[37]) leftArrowPressed();
+				if (map[39]) rightArrowPressed();
+				if (map[38]) upArrowPressed();
+				if (map[40]) downArrowPressed();
+			}
+			
+			function keysReleased(e) {
+				map[e.keyCode] = false;
+			}
+			
+			/*
+			$(document).keydown(function(e) {
+				if (e.keyCode in map) {
+					map[e.keyCode] = true;
+					if (map[37]) leftArrowPressed();
+					if (map[39]) rightArrowPressed();
+					if (map[38]) upArrowPressed();
+					if (map[40]) downArrowPressed();
+				}
+			}).keyup(function(e) {
+				if (e.keyCode in map) {
+					map[e.keyCode] = false;
+				}
+			});*/
 			
 			function getOffset(el) {
 				el = el.getBoundingClientRect();
@@ -70,14 +82,13 @@
 
 			function gameLoop()
 			{
-				moveSelection();
-				setTimeout("gameLoop()",5);
+				setTimeout("gameLoop()",1);
 			}
 
   </script>
   </head>
 
-  <body onload="gameLoop();" onkeydown="moveSelection(event)" onkeyup="" bgcolor='white'>
+  <body onload="gameLoop()" onkeydown="keyPressed(event)" onkeyup="keyReleased(event)" bgcolor='white'>
   <img id="rocket" src="../rocket.png" style="position: absolute; left: 500; right: 500; top: 500; bottom: auto; " height="50" width="50" class="rotate45">
   </body>
 </html>
