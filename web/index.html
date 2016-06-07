@@ -18,28 +18,18 @@
 			var ySpeed = 0;
 
             function leftArrowPressed() {
-                var element = document.getElementById("rocket");
-				if(getOffset(element).left <= 0) return;
 				xSpeed = -1;
             }
 
             function rightArrowPressed() {
-                var element = document.getElementById("rocket");
-				var rect = element.getBoundingClientRect();
-				if(getOffset(element).left + rect.width >= width) return;
 				xSpeed = 1;
             }
 
             function upArrowPressed() {
-                var element = document.getElementById("rocket");
-				if(getOffset(element).top <= 0) return;
 				ySpeed = -1;
             }
 
             function downArrowPressed() {
-                var element = document.getElementById("rocket");
-				var rect = element.getBoundingClientRect();
-				if(getOffset(element).top + rect.height >= height) return;
                 ySpeed = 1;
             }
 			
