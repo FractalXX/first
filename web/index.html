@@ -74,6 +74,18 @@
 				if (!map[38] || !map[40]) {
 					ySpeed = 0;
 				}
+				if (!map[37] && map[39]) {
+					xSpeed = 1;
+				}
+				if (map[37] && !map[39]) {
+					xSpeed = -1;
+				}
+				if (!map[38] && map[40]) {
+					ySpeed = 1;
+				}
+				if (!map[40] && map[38]) {
+					ySpeed = -1;
+				}					
 			}
 			
 			function getOffset(el) {
