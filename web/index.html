@@ -13,39 +13,62 @@
 			var height = window.innerHeight
 			|| document.documentElement.clientHeight
 			|| document.body.clientHeight;	
-
-			window.addEventListener("keydown", keyPressed, false);
-			window.addEventListener("keyup", keyReleased, false);			
+				
+			var xSpeed = 0;
+			var ySpeed = 0;
 
             function leftArrowPressed() {
                 var element = document.getElementById("rocket");
 				if(getOffset(element).left <= 0) return;
-                element.style.left = parseInt(element.style.left) - 5 + 'px';
+				xSpeed = -1;
             }
 
             function rightArrowPressed() {
                 var element = document.getElementById("rocket");
 				var rect = element.getBoundingClientRect();
 				if(getOffset(element).left + rect.width >= width) return;
-                element.style.left = parseInt(element.style.left) + 5 + 'px';
+				xSpeed = 1;
             }
 
             function upArrowPressed() {
                 var element = document.getElementById("rocket");
 				if(getOffset(element).top <= 0) return;
-                element.style.top = parseInt(element.style.top) - 5 + 'px';
+				ySpeed = -1;
             }
 
             function downArrowPressed() {
                 var element = document.getElementById("rocket");
 				var rect = element.getBoundingClientRect();
 				if(getOffset(element).top + rect.height >= height) return;
-                element.style.top = parseInt(element.style.top) + 5 + 'px';
+                ySpeed = 1;
             }
+			
+			function updatePosition() {
+				var element = document.getElementById("rocket");
+				var rect = element.getBoundingClientRect();
+				if(xSpeed > 0 && getOffset(element).left + rect.width >= width) {
+					xSpeed = 0;
+					return;
+				}
+				if(xSpeed < 0 && getOffset(element).left <= 0) {
+					xSpeed = 0;
+					return;
+				}
+				if(ySpeed > 0 && getOffset(element).top + rect.height >= height) {
+					ySpeed = 0;
+					return;
+				}
+				if(ySpeed < 0 && getOffset(element).top <= 0) {
+					ySpeed = 0;
+					return;
+				}				
+				element.style.left = parseInt(element.style.left) + xSpeed + 'px';
+				element.style.top = parseInt(element.style.left) + ySpeed + 'px';
+			}
 			
 			var map = [];
 
-			function keyPressed(e) {
+			function moveRocket(e) {
 				map[e.keyCode] = true;
 				if (map[37]) leftArrowPressed();
 				if (map[39]) rightArrowPressed();
@@ -53,24 +76,15 @@
 				if (map[40]) downArrowPressed();
 			}
 			
-			function keysReleased(e) {
+			function keyReleased(e){
 				map[e.keyCode] = false;
+				if (!map[37] && !map[39]) {
+					xSpeed = 0;
+				}	
+				if (!map[38] && !map[40]) {
+					ySpeed = 0;
+				}
 			}
-			
-			
-			$(document).keydown(function(e) {
-				if (e.keyCode in map) {
-					map[e.keyCode] = true;
-					if (map[37]) leftArrowPressed();
-					if (map[39]) rightArrowPressed();
-					if (map[38]) upArrowPressed();
-					if (map[40]) downArrowPressed();
-				}
-			}).keyup(function(e) {
-				if (e.keyCode in map) {
-					map[e.keyCode] = false;
-				}
-			});
 			
 			function getOffset(el) {
 				el = el.getBoundingClientRect();
@@ -82,15 +96,14 @@
 
 			function gameLoop()
 			{
-				keyPressed();
-				keyReleased();
-				setTimeout(gameLoop,1);
+				updatePosition();
+				setTimeout(gameLoop,5);
 			}
 
   </script>
   </head>
 
-  <body onload="gameLoop()" onkeydown="keyPressed(event)" onkeyup="keyReleased(event)" bgcolor='white'>
+  <body onload="gameLoop()" onkeydown="moveRocket(event)" onkeyup="keyReleased(event)" bgcolor='white'>
   <img id="rocket" src="../rocket.png" style="position: absolute; left: 500; right: 500; top: 500; bottom: auto; " height="50" width="50" class="rotate45">
   </body>
 </html>
