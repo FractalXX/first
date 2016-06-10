@@ -28,10 +28,27 @@ var speedY = 0;
 
 // key map
 var map = [];
+
+function backingScale(context) {
+    if ('devicePixelRatio' in window) {
+        if (window.devicePixelRatio > 1) {
+            return window.devicePixelRatio;
+        }
+    }
+    return 1;
+}
+
+var scaleFactor = backingScale(ctx);
+ 
 			
 window.onload = function() {
 	gameLoop();
-	scaleCanvas();
+	if (scaleFactor > 1) {
+		canvas.width = canvas.width * scaleFactor;
+		canvas.height = canvas.height * scaleFactor;
+		// update the context for the new canvas scale
+		var ctx = canvas.getContext("2d");
+	}	
 };
 
 img.onload = function() {
@@ -52,22 +69,8 @@ $(document).keyup(function(e) {
 	if(!map[38] && !map[40]) speedY = 0;
 });
 
-function scaleCanvas() {
-	if (window.devicePixelRatio > 1) {
-		var canvasWidth = canvas.width;
-		var canvasHeight = canvas.height;
-
-		canvas.width = canvasWidth * window.devicePixelRatio;
-		canvas.height = canvasHeight * window.devicePixelRatio;
-		canvas.style.width = canvasWidth;
-		canvas.style.height = canvasHeight;
-
-		ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-	}
-}
-
 function update() {	
-	scaleCanvas();
+
 	ctx.clearRect(imgX, imgY, img.width, img.height);
 
 	if(!checkBorders()) {
