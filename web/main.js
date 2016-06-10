@@ -71,7 +71,7 @@ $(document).keyup(function(e) {
 
 function update() {	
 
-	ctx.clearRect(imgX, imgY, img.width, img.height);
+	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
 
 	if(!checkBorders()) {
 		imgX += speedX;
