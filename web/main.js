@@ -31,6 +31,7 @@ var map = [];
 			
 window.onload = function() {
 	gameLoop();
+	scaleCanvas();
 };
 
 img.onload = function() {
@@ -51,8 +52,16 @@ $(document).keyup(function(e) {
 	if(!map[38] && !map[40]) speedY = 0;
 });
 
-function update() {	
+function scaleCanvas() {
+	if(window.devicePixelRatio == 2) {
+		canvas.setAttribute('width', 2*cWidth);
+		canvas.setAttribute('height', 2*cHeight);
+		ctx.scale(2, 2);
+	}
+}
 
+function update() {	
+	scaleCanvas();
 	ctx.clearRect(imgX, imgY, img.width, img.height);
 
 	if(!checkBorders()) {
