@@ -53,10 +53,16 @@ $(document).keyup(function(e) {
 });
 
 function scaleCanvas() {
-	if(window.devicePixelRatio == 2) {
-		canvas.setAttribute('width', 2*cWidth);
-		canvas.setAttribute('height', 2*cHeight);
-		ctx.scale(2, 2);
+	if (window.devicePixelRatio > 1) {
+		var canvasWidth = canvas.width;
+		var canvasHeight = canvas.height;
+
+		canvas.width = canvasWidth * window.devicePixelRatio;
+		canvas.height = canvasHeight * window.devicePixelRatio;
+		canvas.style.width = canvasWidth;
+		canvas.style.height = canvasHeight;
+
+		ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 	}
 }
 
@@ -70,8 +76,7 @@ function update() {
 	}
 	
 	ctx.save();
-	if(window.devicePixelRatio == 2) ctx.drawImage(img, imgX, imgY, img.width/2, img.height/2);
-	else ctx.drawImage(img, imgX, imgY);
+	ctx.drawImage(img, imgX, imgY);
 	ctx.restore();
 }
 
