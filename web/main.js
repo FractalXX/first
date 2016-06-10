@@ -70,7 +70,8 @@ function update() {
 	}
 	
 	ctx.save();
-	ctx.drawImage(img, imgX, imgY);
+	if(window.devicePixelRatio == 2) ctx.drawImage(img, imgX, imgY, img.width/2, img.height/2);
+	else ctx.drawImage(img, imgX, imgY);
 	ctx.restore();
 }
 
