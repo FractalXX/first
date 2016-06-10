@@ -1,111 +1,13 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<link rel="stylesheet" type="text/css" href="rocket.css">
+	<link rel="stylesheet" type="text/css" href="index.css">
     <title>Hello World!</title>
-
-       <script type="text/javascript">
-			
-			var width = window.innerWidth
-			|| document.documentElement.clientWidth
-			|| document.body.clientWidth;
-
-			var height = window.innerHeight
-			|| document.documentElement.clientHeight
-			|| document.body.clientHeight;	
-				
-			var xSpeed = 0;
-			var ySpeed = 0;
-
-            function leftArrowPressed() {
-				xSpeed = -1;
-            }
-
-            function rightArrowPressed() {
-				xSpeed = 1;
-            }
-
-            function upArrowPressed() {
-				ySpeed = -1;
-            }
-
-            function downArrowPressed() {
-                ySpeed = 1;
-            }
-			
-			function updatePosition() {
-				var element = document.getElementById("rocket");
-				var rect = element.getBoundingClientRect();
-				if(xSpeed > 0 && getOffset(element).left + rect.width >= width) {
-					xSpeed = 0;
-					return;
-				}
-				if(xSpeed < 0 && getOffset(element).left <= 0) {
-					xSpeed = 0;
-					return;
-				}
-				if(ySpeed > 0 && getOffset(element).top + rect.height >= height) {
-					ySpeed = 0;
-					return;
-				}
-				if(ySpeed < 0 && getOffset(element).top <= 0) {
-					ySpeed = 0;
-					return;
-				}				
-				element.style.left = parseInt(element.style.left) + xSpeed + 'px';
-				element.style.top = parseInt(element.style.top) + ySpeed + 'px';
-			}
-			
-			var map = [];
-
-			function moveRocket(e) {
-				map[e.keyCode] = true;
-				if (map[37]) leftArrowPressed();
-				if (map[39]) rightArrowPressed();
-				if (map[38]) upArrowPressed();
-				if (map[40]) downArrowPressed();
-			}
-			
-			function keyReleased(e){
-				map[e.keyCode] = false;
-				if (!map[37] || !map[39]) {
-					xSpeed = 0;
-				}	
-				if (!map[38] || !map[40]) {
-					ySpeed = 0;
-				}
-				if (!map[37] && map[39]) {
-					xSpeed = 1;
-				}
-				if (map[37] && !map[39]) {
-					xSpeed = -1;
-				}
-				if (!map[38] && map[40]) {
-					ySpeed = 1;
-				}
-				if (!map[40] && map[38]) {
-					ySpeed = -1;
-				}					
-			}
-			
-			function getOffset(el) {
-				el = el.getBoundingClientRect();
-				return {
-					left: el.left + window.scrollX,
-					top: el.top + window.scrollY
-				}
-			}
-
-			function gameLoop()
-			{
-				updatePosition();
-				setTimeout(gameLoop,5);
-			}
-
-  </script>
   </head>
-
-  <body onload="gameLoop()" onkeydown="moveRocket(event)" onkeyup="keyReleased(event)" bgcolor='white'>
-  <img id="rocket" src="../rocket.png" style="position: absolute; left: 500; right: 500; top: 500; bottom: auto; " height="50" width="50" class="rotate45">
+  
+  <canvas id="myCanvas" width="600" height="300"></canvas>
+  <body>
+  <script src="main.js"></script>
+  </body>
   </body>
 </html>
