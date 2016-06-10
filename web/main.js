@@ -13,6 +13,8 @@ img.src = "rocket.png";
 
 var imgX = 20;
 var imgY = 20;
+var oldimgX = imgX;
+var oldimgY = imgY;
 
 //canvas properties
 var canvas = document.getElementById("myCanvas");
@@ -71,9 +73,12 @@ $(document).keyup(function(e) {
 
 function update() {	
 
+	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
 
 	if(!checkBorders()) {
+		oldimgX = imgX;
+		oldimgY = imgY;
 		imgX += speedX;
 		imgY += speedY;
 	}
