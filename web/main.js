@@ -22,59 +22,47 @@ canvas.width = cWidth;
 canvas.height = cHeight;
 ctx.fillStyle = "#FFFFFF";
 
-
 // speed of rocket
 var speedX = 0;
 var speedY = 0;
 
 // key map
-var map = {37: -1, 39: 1, 38: -1, 40: 1};
+var map = [];
 			
 window.onload = function() {
 	gameLoop();
 };
 
 img.onload = function() {
-	updatePosition();
+	update();
 };
 
-window.onkeydown = function(e) {
-	// left or right
-	if (e.keyCode == 37 || e.keyCode == 39) {
-		speedX = map[e.keyCode];
-	}
-	// up or down
-	if (e.keyCode == 38 || e.keyCode == 40) {
-		speedY = map[e.keyCode];
-	}
-}
+$(document).keydown(function(e) {
+	map[e.keyCode] = true;
+	if(e.keyCode == 37) speedX = -1;
+	if(e.keyCode == 39) speedX = 1;
+	if(e.keyCode == 38) speedY = -1;
+	if(e.keyCode == 40) speedY = 1;
+});
 
-window.onkeyup = function(e) {
-	//left or right
-	if (e.keyCode == 37 || e.keyCode == 39) {
-		speedX -= map[e.keyCode];
-	}
-	//up or down
-	if (e.keyCode == 38 || e.keyCode == 40) {
-		speedY -= map[e.keyCode];
-	}
-}
+$(document).keyup(function(e) {
+	map[e.keyCode] = false;
+	if(!map[37] && !map[39]) speedX = 0;
+	if(!map[38] && !map[40]) speedY = 0;
+});
 
-function updatePosition() {	
+function update() {	
+
+	ctx.clearRect(imgX, imgY, img.width, img.height);
 
 	if(!checkBorders()) {
 		imgX += speedX;
 		imgY += speedY;
 	}
-
-	updateCanvas();
-}
-
-function updateCanvas() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save();
+	
+	ctx.save();
 	ctx.drawImage(img, imgX, imgY);
-	ctx.restore();	
+	ctx.restore();
 }
 
 function checkBorders() {
@@ -99,6 +87,6 @@ function checkBorders() {
 
 function gameLoop()
 {
-	updatePosition();
-	setTimeout(gameLoop,1);
+	update();
+	setTimeout(gameLoop, 1);
 }
