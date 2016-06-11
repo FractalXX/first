@@ -31,6 +31,9 @@ levelCanvas.width = cWidth;
 levelCanvas.height = cHeight;
 levelCtx.fillStyle = "#FF00FF";
 
+var genX = 0;
+var genY = levelCanvas.height;
+
 // speed of rocket
 var speedX = 0;
 var speedY = 0;
@@ -51,7 +54,6 @@ var scaleFactor = backingScale(ctx);
 			
 window.onload = function() {
 	gameLoop();
-	levelCtx.fillRect(0,0,150,100);
 	if (scaleFactor > 1) {
 		canvas.width = canvas.width * scaleFactor;
 		canvas.height = canvas.height * scaleFactor;
@@ -100,7 +102,18 @@ function update() {
 }
 
 function generateLevel() {
-
+	lineLength = Math.floor((Math.random() * 20) + 10);
+	
+	levelCtx.save();
+	
+	levelCtx.beginPath();
+	levelCtx.moveTo(genX,genY);
+	levelCtx.lineTo(genX,genY-lineLength);
+	levelCtx.stroke();
+	
+	levelCtx.restore();
+	
+	genX += 1;
 }
 
 function checkBorders() {

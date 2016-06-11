@@ -12,17 +12,18 @@ body, html {
     position: relative;
 }
 
-.stage canvas {
+#myCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;
-	background-color: transparent;	
-}
-
-myCanvas {
+	background-color: transparent;		
 	z-index: 1;
 }
 
-level {	
+#level {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
 	z-index: 2;
 }
