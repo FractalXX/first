@@ -23,6 +23,9 @@ var ctx = canvas.getContext("2d");
 var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
 
+var minLvlHeight = 100;
+var maxLvlHeight = cHeight/6;
+
 canvas.width = cWidth;
 canvas.height = cHeight;
 ctx.fillStyle = "#000000";
@@ -31,8 +34,10 @@ levelCanvas.width = cWidth;
 levelCanvas.height = cHeight;
 levelCtx.fillStyle = "#FF00FF";
 
+var imgData = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
+
 var genX = 0;
-var genY = levelCanvas.height;
+var genY = levelCanvas.height - minLvlHeight;
 
 // speed of rocket
 var speedX = 0;
@@ -84,6 +89,8 @@ $(document).keyup(function(e) {
 function update() {	
 
 	window.requestAnimationFrame(update);
+	
+	generateLevel();
 
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
@@ -102,18 +109,30 @@ function update() {
 }
 
 function generateLevel() {
-	lineLength = Math.floor((Math.random() * 20) + 10);
 	
-	levelCtx.save();
+	var curveEnd = Math.floor(Math.random() * maxLvlHeight) + minLvlHeight;
+	var curveDir = Math.random() < 0.5 ? -1 : 1;
 	
-	levelCtx.beginPath();
-	levelCtx.moveTo(genX,genY);
-	levelCtx.lineTo(genX,genY-lineLength);
-	levelCtx.stroke();
+	for (i = 0; i < curveEnd; i++) { 
+		if(genY >= levelCanvas.height - minLvlHeight) curveDir *= -1;
+		else if(i == curveEnd*Math.random()) curveDir *= -1;
 	
-	levelCtx.restore();
+		levelCtx.save();
+		
+		levelCtx.beginPath();
+		levelCtx.moveTo(genX,cHeight);
+		levelCtx.lineTo(genX,genY);
+		levelCtx.stroke();
+		
+		levelCtx.restore();
+		
+		var vStepping = Math.random() * curveDir;
+		
+		genX += 0.5;
+		genY += Math.random() < 0.5 ? vStepping : 0;
+		
+	}
 	
-	genX += 1;
 }
 
 function checkBorders() {
@@ -138,6 +157,5 @@ function checkBorders() {
 
 function gameLoop()
 {
-	generateLevel();
 	setTimeout(gameLoop, 200);
 }
