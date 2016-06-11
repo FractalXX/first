@@ -20,9 +20,16 @@ var oldimgY = imgY;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
+var levelCanvas = document.getElementById("level");
+var levelCtx = levelCanvas.getContext("2d");
+
 canvas.width = cWidth;
 canvas.height = cHeight;
-ctx.fillStyle = "#FFFFFF";
+ctx.fillStyle = "#000000";
+
+levelCanvas.width = cWidth;
+levelCanvas.height = cHeight;
+levelCtx.fillStyle = "#FF00FF";
 
 // speed of rocket
 var speedX = 0;
@@ -41,16 +48,17 @@ function backingScale(context) {
 }
 
 var scaleFactor = backingScale(ctx);
- 
 			
 window.onload = function() {
 	gameLoop();
+	levelCtx.fillRect(0,0,150,100);
 	if (scaleFactor > 1) {
 		canvas.width = canvas.width * scaleFactor;
 		canvas.height = canvas.height * scaleFactor;
 		// update the context for the new canvas scale
 		var ctx = canvas.getContext("2d");
-	}	
+	}
+	setTimeout(update,1000/60);
 };
 
 img.onload = function() {
@@ -59,10 +67,10 @@ img.onload = function() {
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
-	if(e.keyCode == 37) speedX = -1;
-	if(e.keyCode == 39) speedX = 1;
-	if(e.keyCode == 38) speedY = -1;
-	if(e.keyCode == 40) speedY = 1;
+	if(e.keyCode == 37) speedX = -2;
+	if(e.keyCode == 39) speedX = 2;
+	if(e.keyCode == 38) speedY = -2;
+	if(e.keyCode == 40) speedY = 2;
 });
 
 $(document).keyup(function(e) {
@@ -72,6 +80,8 @@ $(document).keyup(function(e) {
 });
 
 function update() {	
+
+	window.requestAnimationFrame(update);
 
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
@@ -86,6 +96,11 @@ function update() {
 	ctx.save();
 	ctx.drawImage(img, imgX, imgY);
 	ctx.restore();
+	
+}
+
+function generateLevel() {
+
 }
 
 function checkBorders() {
@@ -110,6 +125,6 @@ function checkBorders() {
 
 function gameLoop()
 {
-	update();
-	setTimeout(gameLoop, 1);
+	generateLevel();
+	setTimeout(gameLoop, 200);
 }

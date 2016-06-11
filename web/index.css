@@ -3,8 +3,26 @@ body, html {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+	overflow: hidden;
 }
-myCanvas {
+
+.stage {
+	width: 600px;
+    height: 300px;
+    position: relative;
+}
+
+.stage canvas {
     position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;	
+}
+
+myCanvas {
+	z-index: 1;
+}
+
+level {	
+	z-index: 2;
 }
