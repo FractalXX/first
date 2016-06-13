@@ -16,6 +16,14 @@ var imgY = 20;
 var oldimgX = imgX;
 var oldimgY = imgY;
 
+var tileset = new Image();
+tileset.src = 'tileset.png';
+var tileSize = 16;
+
+var tileArray = [];
+
+var genTile;
+
 //canvas properties
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -23,21 +31,26 @@ var ctx = canvas.getContext("2d");
 var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
 
-var minLvlHeight = 100;
-var maxLvlHeight = cHeight/6;
+var minBottomHeight = cHeight-16;
+var maxBottomHeight = Math.floor(cHeight/16) * 14;
+
+var minTopHeight = 0;
+var maxTopHeight = Math.floor(cHeight/16) * 4;
 
 canvas.width = cWidth;
 canvas.height = cHeight;
 ctx.fillStyle = "#000000";
 
-levelCanvas.width = cWidth;
+levelCanvas.width = cWidth+cWidth/2;
 levelCanvas.height = cHeight;
-levelCtx.fillStyle = "#FF00FF";
+levelCtx.fillStyle = "#000000";
 
-var imgData = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
+var colorLayer = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
 
-var genX = 0;
-var genY = levelCanvas.height - minLvlHeight;
+var bGenX = 0;
+var bGenY = maxBottomHeight;
+
+var tGenY = maxTopHeight;
 
 // speed of rocket
 var speedX = 0;
@@ -45,26 +58,33 @@ var speedY = 0;
 
 // key map
 var map = [];
+var points = [];
 
 function backingScale(context) {
     if ('devicePixelRatio' in window) {
         if (window.devicePixelRatio > 1) {
             return window.devicePixelRatio;
-        }
-    }
+		}
+	}
     return 1;
 }
 
 var scaleFactor = backingScale(ctx);
-			
+
 window.onload = function() {
-	gameLoop();
 	if (scaleFactor > 1) {
 		canvas.width = canvas.width * scaleFactor;
 		canvas.height = canvas.height * scaleFactor;
 		// update the context for the new canvas scale
 		var ctx = canvas.getContext("2d");
 	}
+	fillAir();
+	genTile = createTile(0, 0, 3, 6);
+	fillRow(minBottomHeight, 3, 6);
+	fillRow(minBottomHeight+16, 3, 6);
+	fillRow(minBottomHeight+32, 3, 6);
+	fillRow(minBottomHeight+48, 3, 6);
+	fillRow(minTopHeight, 3, 6);
 	setTimeout(update,1000/60);
 };
 
@@ -87,14 +107,14 @@ $(document).keyup(function(e) {
 });
 
 function update() {	
-
+	
 	window.requestAnimationFrame(update);
 	
 	generateLevel();
-
+	
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
-
+	
 	if(!checkBorders()) {
 		oldimgX = imgX;
 		oldimgY = imgY;
@@ -102,21 +122,97 @@ function update() {
 		imgY += speedY;
 	}
 	
-	ctx.save();
 	ctx.drawImage(img, imgX, imgY);
-	ctx.restore();
 	
+	renderTiles();
+	
+}
+
+function renderTiles() {
+	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
+	for(var i = 0; i < tileArray.length; i++) {
+		if(tileArray[i].id != -1 && !isAir(i)) {
+			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
+		}	
+	}
 }
 
 function generateLevel() {
 	
-	var curveEnd = Math.floor(Math.random() * maxLvlHeight) + minLvlHeight;
-	var curveDir = Math.random() < 0.5 ? -1 : 1;
+	var generator = new Simple1DNoise();
 	
-	for (i = 0; i < curveEnd; i++) { 
+	var chance = Math.random();
+	
+	if(chance <= 0.25) {
+		bGenY += 16;
+	}
+	else if(chance <= 0.50) {
+		bGenY -= 16;
+	}
+	
+	if(bGenY > maxBottomHeight) bGenY = maxBottomHeight;
+	
+	genTile = createTile(bGenX, bGenY, 3, 1);
+	
+	createTile(bGenX, bGenY+16, 3, 1);
+	createTile(bGenX, bGenY+32, 3, 1);
+	
+	for(var i = minBottomHeight; i > bGenY+32; i -= 16) {
+		createTile(bGenX, i, 3, 6);
+	}
+	
+	chance = Math.random();
+	
+	if(chance <= 0.25) {
+		tGenY += 16;
+	}
+	else if(chance <= 0.50) {
+		tGenY -= 16;
+	}
+	
+	if(tGenY > maxTopHeight) tGenY = maxTopHeight;
+	
+	genTile = createTile(bGenX, tGenY, 3, 1);
+	
+	createTile(bGenX, tGenY-16, 3, 1);
+	createTile(bGenX, tGenY-32, 3, 1);
+	
+	for(var i = tGenY-32; i > minTopHeight; i -= 16) {
+		createTile(bGenX, i, 3, 6);
+	}	
+	
+	bGenX += 16;
+	
+	/*for(var i = 0; i < levelCanvas.width; i += 4) {
+		//bottom
+		levelCtx.beginPath();
+		levelCtx.moveTo(bGenX,bGenY);
+		bGenX += Math.floor(Math.random() * 70) + 30;
+		bGenY = maxBottomHeight - generator.getVal(bGenX);	
+		levelCtx.lineTo(bGenX,bGenY);
+		levelCtx.stroke();
+					
+		//top
+		levelCtx.beginPath();
+		levelCtx.moveTo(tGenX,tGenY);
+		tGenX += Math.floor(Math.random() * 70) + 30;
+		tGenY = maxTopHeight + generator.getVal(tGenX);	
+		levelCtx.lineTo(tGenX,tGenY);
+		levelCtx.stroke();		
+	}
+	
+	resetGeneration();
+	
+	levelCtx.transform(1,0,0,1,-1,0);
+	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
+	
+	var curveEnd = Math.floor(Math.random() * maxLvlHeight) + minLvlHeight;
+		var curveDir = Math.random() < 0.5 ? -1 : 1;
+		
+		for (i = 0; i < curveEnd; i++) { 
 		if(genY >= levelCanvas.height - minLvlHeight) curveDir *= -1;
 		else if(i == curveEnd*Math.random()) curveDir *= -1;
-	
+		
 		levelCtx.save();
 		
 		levelCtx.beginPath();
@@ -131,8 +227,73 @@ function generateLevel() {
 		genX += 0.5;
 		genY += Math.random() < 0.5 ? vStepping : 0;
 		
+	}*/
+}
+
+/*function assignStyle(tileObj) {
+	
+	if(tileObj.y == minBottomHeight || tileObj.y == minTopHeight) {
+		tileObj.row = 3;
+		tileObj.column = 6;
+		return;
+	}	
+	
+	var isLeft = false;
+	var isTop = false;
+	var isRight = false;
+	
+	for(var i = 0; i < tileArray.length; i++) {
+		if(tileArray[i].x == tileObj.x-16 && isAir(i)) {
+			isLeft = true;
+		}
+		if(tileArray[i].y == tileObj.y+16 && isAir(i)) {
+			isTop = true;
+		}
+		if(tileArray[i].x == tileObj.x+16 && isAir(i)) {
+			isRight = true;
+		}
 	}
 	
+	if(isLeft) {
+		tileObj.row = 3;
+		tileObj.column = 0;
+	}
+	
+	if(isTop) {
+		tileObj.row = 1;
+		tileObj.column = 1;
+	}
+	
+	if(isRight) {
+		tileObj.row = 3;
+		tileObj.column = 2;
+	}
+}*/
+
+function isAir(tileid) {
+	return tileArray[tileid].row == 4 && tileArray[tileid].column == 2 ? true : false;
+}
+
+function fillAir() {
+	for(var i = 0; i < levelCanvas.width; i += 16) {
+		for(var j = 0; j < levelCanvas.height; j += 16) {
+			createTile(i, j, 4, 2);
+		}
+	}
+}
+
+function fillRow(y, tilerow, tilecolumn) {
+	for(var i = 0; i < levelCanvas.width; i += 16) {
+		createTile(i, y, tilerow, tilecolumn);
+	}		
+}
+
+function resetGeneration() {
+	bGenX = 0;
+	bGenY = maxBottomHeight;
+
+	tGenX = 0;
+	tGenY = minTopHeight;
 }
 
 function checkBorders() {
@@ -155,7 +316,80 @@ function checkBorders() {
 	return false;
 }
 
-function gameLoop()
-{
-	setTimeout(gameLoop, 200);
+function createTile(x, y, row, column) {
+	for(var i = 0; i < tileArray.length; i++) {
+		if(x == tileArray[i].x && y == tileArray[i].y) {
+			deleteTile(i);
+		}
+	}
+	
+	var tile = new Tile();
+	tile.x = x;
+	tile.y = y;
+	tile.row = row;
+	tile.column = column;
+	
+	tileArray.push(tile);
+	
+	return tile;
 }
+
+function deleteTile(tileid) {
+	tileArray[tileid].x = -1;
+	tileArray[tileid].y = -1;
+	tileArray[tileid].row = -1;
+	tileArray[tileid].column = -1;
+	tileArray[tileid].id = -1;
+	
+	isUsedId[tileid] = false;
+}
+
+var Simple1DNoise = function() {
+    var MAX_VERTICES = 256;
+    var MAX_VERTICES_MASK = MAX_VERTICES -1;
+    var amplitude = 150;
+    var scale = Math.floor(Math.random() * 2) + 1;
+	
+    var r = [];
+	
+    for ( var i = 0; i < MAX_VERTICES; ++i ) {
+        r.push(Math.random());
+	}
+	
+    var getVal = function( x ){
+        var scaledX = x * scale;
+        var xFloor = Math.floor(scaledX);
+        var t = scaledX - xFloor;
+        var tRemapSmoothstep = t * t * ( 3 - 2 * t );
+		
+        /// Modulo using &
+        var xMin = xFloor & MAX_VERTICES_MASK;
+        var xMax = ( xMin + 1 ) & MAX_VERTICES_MASK;
+		
+        var y = lerp( r[ xMin ], r[ xMax ], tRemapSmoothstep );
+		
+        return y * amplitude;
+	};
+	
+    /**
+		* Linear interpolation function.
+		* @param a The lower integer value
+		* @param b The upper integer value
+		* @param t The value between the two
+		* @returns {number}
+	*/
+    var lerp = function(a, b, t ) {
+        return a * ( 1 - t ) + b * t;
+	};
+	
+    // return the API
+    return {
+        getVal: getVal,
+        setAmplitude: function(newAmplitude) {
+            amplitude = newAmplitude;
+		},
+        setScale: function(newScale) {
+            scale = newScale;
+		}
+	};
+};
