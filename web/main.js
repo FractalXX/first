@@ -11,8 +11,8 @@ var cHeight = window.innerHeight
 var img = new Image();
 img.src = "rocket.png";
 
-var imgX = 20;
-var imgY = 20;
+var imgX = 0;
+var imgY = cHeight/2;
 var oldimgX = imgX;
 var oldimgY = imgY;
 
@@ -22,8 +22,6 @@ var tileSize = 16;
 
 var tileArray = [];
 
-var genTile;
-
 //canvas properties
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -32,7 +30,7 @@ var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
 
 var minBottomHeight = cHeight-16;
-var maxBottomHeight = Math.floor(cHeight/16) * 14;
+var maxBottomHeight = cHeight-16*12;
 
 var minTopHeight = 0;
 var maxTopHeight = Math.floor(cHeight/16) * 4;
@@ -41,16 +39,16 @@ canvas.width = cWidth;
 canvas.height = cHeight;
 ctx.fillStyle = "#000000";
 
-levelCanvas.width = cWidth+cWidth/2;
+levelCanvas.width = cWidth+16;
 levelCanvas.height = cHeight;
 levelCtx.fillStyle = "#000000";
 
 var colorLayer = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
 
 var bGenX = 0;
-var bGenY = maxBottomHeight;
+var bGenY = minBottomHeight-16;
 
-var tGenY = maxTopHeight;
+var tGenY = minTopHeight+16;
 
 // speed of rocket
 var speedX = 0;
@@ -78,26 +76,15 @@ window.onload = function() {
 		// update the context for the new canvas scale
 		var ctx = canvas.getContext("2d");
 	}
-	fillAir();
-	genTile = createTile(0, 0, 3, 6);
-	fillRow(minBottomHeight, 3, 6);
-	fillRow(minBottomHeight+16, 3, 6);
-	fillRow(minBottomHeight+32, 3, 6);
-	fillRow(minBottomHeight+48, 3, 6);
-	fillRow(minTopHeight, 3, 6);
-	setTimeout(update,1000/60);
-};
-
-img.onload = function() {
-	update();
+	setTimeout(update,1);
 };
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
-	if(e.keyCode == 37) speedX = -2;
-	if(e.keyCode == 39) speedX = 2;
-	if(e.keyCode == 38) speedY = -2;
-	if(e.keyCode == 40) speedY = 2;
+	if(e.keyCode == 37) speedX = -4;
+	if(e.keyCode == 39) speedX = 4;
+	if(e.keyCode == 38) speedY = -4;
+	if(e.keyCode == 40) speedY = 4;
 });
 
 $(document).keyup(function(e) {
@@ -109,8 +96,6 @@ $(document).keyup(function(e) {
 function update() {	
 	
 	window.requestAnimationFrame(update);
-	
-	generateLevel();
 	
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
@@ -124,14 +109,17 @@ function update() {
 	
 	ctx.drawImage(img, imgX, imgY);
 	
-	renderTiles();
+	generateLevel();
 	
+	scrollLevel();
+	
+	renderTiles();
 }
 
 function renderTiles() {
-	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
+	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i].id != -1 && !isAir(i)) {
+		if(tileArray[i].id != -1 && tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
 			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
 		}	
 	}
@@ -141,91 +129,46 @@ function generateLevel() {
 	
 	var chance = Math.random();
 	
-	if(chance <= 0.25) {
+	if(chance <= 0.25 && bGenY < minBottomHeight-32) {
 		bGenY += 16;
 	}
-	else if(chance <= 0.50) {
+	else if(chance <= 0.50 && bGenY > maxBottomHeight) {
 		bGenY -= 16;
 	}
 	
-	if(bGenY > maxBottomHeight) bGenY = maxBottomHeight;
-	
-	genTile = createTile(bGenX, bGenY, 3, 1);
-	
+	createTile(bGenX, bGenY, 3, 1);
 	createTile(bGenX, bGenY+16, 3, 1);
-	createTile(bGenX, bGenY+32, 3, 1);
 	
-	for(var i = minBottomHeight; i > bGenY+32; i -= 16) {
+	for(var i = minBottomHeight; i > bGenY+16; i -= 16) {
 		createTile(bGenX, i, 3, 6);
 	}
 	
 	chance = Math.random();
-	
-	if(chance <= 0.25) {
+		
+	if(chance <= 0.25 && tGenY < maxTopHeight) {
 		tGenY += 16;
 	}
-	else if(chance <= 0.50) {
+	else if(chance <= 0.50 && tGenY > minTopHeight+32) {
 		tGenY -= 16;
-	}
+	}		
 	
-	if(tGenY > maxTopHeight) tGenY = maxTopHeight;
-	
-	genTile = createTile(bGenX, tGenY, 3, 1);
-	
+	createTile(bGenX, tGenY, 3, 1);
 	createTile(bGenX, tGenY-16, 3, 1);
-	createTile(bGenX, tGenY-32, 3, 1);
 	
-	for(var i = tGenY-32; i > minTopHeight; i -= 16) {
+	for(var i = tGenY-16; i >= minTopHeight; i -= 16) {
 		createTile(bGenX, i, 3, 6);
-	}	
-	
-	bGenX += 16;
-	
-	/*for(var i = 0; i < levelCanvas.width; i += 4) {
-		//bottom
-		levelCtx.beginPath();
-		levelCtx.moveTo(bGenX,bGenY);
-		bGenX += Math.floor(Math.random() * 70) + 30;
-		bGenY = maxBottomHeight - generator.getVal(bGenX);	
-		levelCtx.lineTo(bGenX,bGenY);
-		levelCtx.stroke();
-					
-		//top
-		levelCtx.beginPath();
-		levelCtx.moveTo(tGenX,tGenY);
-		tGenX += Math.floor(Math.random() * 70) + 30;
-		tGenY = maxTopHeight + generator.getVal(tGenX);	
-		levelCtx.lineTo(tGenX,tGenY);
-		levelCtx.stroke();		
 	}
 	
-	resetGeneration();
+	bGenX = levelCanvas.width-16;
 	
-	levelCtx.transform(1,0,0,1,-1,0);
-	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
-	
-	var curveEnd = Math.floor(Math.random() * maxLvlHeight) + minLvlHeight;
-		var curveDir = Math.random() < 0.5 ? -1 : 1;
-		
-		for (i = 0; i < curveEnd; i++) { 
-		if(genY >= levelCanvas.height - minLvlHeight) curveDir *= -1;
-		else if(i == curveEnd*Math.random()) curveDir *= -1;
-		
-		levelCtx.save();
-		
-		levelCtx.beginPath();
-		levelCtx.moveTo(genX,cHeight);
-		levelCtx.lineTo(genX,genY);
-		levelCtx.stroke();
-		
-		levelCtx.restore();
-		
-		var vStepping = Math.random() * curveDir;
-		
-		genX += 0.5;
-		genY += Math.random() < 0.5 ? vStepping : 0;
-		
-	}*/
+}
+
+function scrollLevel() {
+	for(var i = 0; i < tileArray.length; i++) {
+		if(tileArray[i].id != -1) {
+			tileArray[i].x -= 16;
+		}	
+	}
 }
 
 /*function assignStyle(tileObj) {
@@ -268,7 +211,7 @@ function generateLevel() {
 	}
 }*/
 
-function isAir(tileid) {
+/*function isAir(tileid) {
 	return tileArray[tileid].row == 4 && tileArray[tileid].column == 2 ? true : false;
 }
 
@@ -278,7 +221,7 @@ function fillAir() {
 			createTile(i, j, 4, 2);
 		}
 	}
-}
+}*/
 
 function fillRow(y, tilerow, tilecolumn) {
 	for(var i = 0; i < levelCanvas.width; i += 16) {
