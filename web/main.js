@@ -76,7 +76,7 @@ window.onload = function() {
 		// update the context for the new canvas scale
 		var ctx = canvas.getContext("2d");
 	}
-	setTimeout(update,1);
+	setInterval(update, 1000/60);
 };
 
 $(document).keydown(function(e) {
@@ -94,8 +94,6 @@ $(document).keyup(function(e) {
 });
 
 function update() {	
-	
-	window.requestAnimationFrame(update);
 	
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
@@ -167,6 +165,7 @@ function scrollLevel() {
 	for(var i = 0; i < tileArray.length; i++) {
 		if(tileArray[i].id != -1) {
 			tileArray[i].x -= 16;
+			if(tileArray[i].x < 0) deleteTile(i);
 		}	
 	}
 }
@@ -270,8 +269,6 @@ function createTile(x, y, row, column) {
 	tile.row = row;
 	tile.column = column;
 	
-	tileArray.push(tile);
-	
 	return tile;
 }
 
@@ -280,7 +277,6 @@ function deleteTile(tileid) {
 	tileArray[tileid].y = -1;
 	tileArray[tileid].row = -1;
 	tileArray[tileid].column = -1;
-	tileArray[tileid].id = -1;
-	
 	isUsedId[tileid] = false;
+	tileArray[tileid].id = -1;
 }

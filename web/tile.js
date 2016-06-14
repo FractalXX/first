@@ -11,5 +11,7 @@ function Tile(x, y, row, column) {
 		this.id += 1;
 	} 
 	while(isUsedId[this.id]);
-	isUsedId[this.id] = true;	
+	isUsedId[this.id] = true;
+	
+	tileArray.push(this);
 }
