@@ -27,3 +27,11 @@ body, html {
 	background-color: transparent;		
 	z-index: 2;
 }
+
+#fx {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 3;
+}

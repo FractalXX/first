@@ -11,6 +11,9 @@ var cHeight = window.innerHeight
 var img = new Image();
 img.src = "rocket.png";
 
+var expImg = new Image();
+expImg.src = "explosion.png";
+
 var imgX = 0;
 var imgY = cHeight/2;
 var oldimgX = imgX;
@@ -29,6 +32,9 @@ var ctx = canvas.getContext("2d");
 var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
 
+var fxCanvas = document.getElementById("fx");
+var fxCtx = fxCanvas.getContext("2d");
+
 var minBottomHeight = cHeight-16;
 var maxBottomHeight = cHeight-16*12;
 
@@ -42,6 +48,10 @@ ctx.fillStyle = "#000000";
 levelCanvas.width = cWidth+16;
 levelCanvas.height = cHeight;
 levelCtx.fillStyle = "#000000";
+
+fxCanvas.width = cWidth;
+fxCanvas.height = cHeight;
+fxCtx.fillStyle = "#000000";
 
 var colorLayer = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
 
@@ -77,6 +87,7 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	setInterval(update, 1000/60);
+	setInterval(generateLevel, 1000/30);
 };
 
 $(document).keydown(function(e) {
@@ -98,7 +109,16 @@ function update() {
 	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
 	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
 	
-	if(!checkBorders()) {
+	if(tileCollision()) {
+		createExplosion(imgX, imgY);
+		
+		imgX = levelCanvas.width + img.width;
+		imgY = levelCanvas.height + img.height;
+		
+		setTimeout(resetShip, 2000);
+	}
+	
+	if(!checkBorders() && !tileCollision()) {
 		oldimgX = imgX;
 		oldimgY = imgY;
 		imgX += speedX;
@@ -107,17 +127,13 @@ function update() {
 	
 	ctx.drawImage(img, imgX, imgY);
 	
-	generateLevel();
-	
-	scrollLevel();
-	
 	renderTiles();
 }
 
 function renderTiles() {
 	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i].id != -1 && tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
+		if(tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
 			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
 		}	
 	}
@@ -159,6 +175,8 @@ function generateLevel() {
 	
 	bGenX = levelCanvas.width-16;
 	
+	scrollLevel();
+	
 }
 
 function scrollLevel() {
@@ -168,6 +186,11 @@ function scrollLevel() {
 			if(tileArray[i].x < 0) deleteTile(i);
 		}	
 	}
+}
+
+function resetShip() {
+	imgX = 0;
+	imgY = levelCanvas.height/2;
 }
 
 /*function assignStyle(tileObj) {
@@ -228,13 +251,13 @@ function fillRow(y, tilerow, tilecolumn) {
 	}		
 }
 
-function resetGeneration() {
+/*function resetGeneration() {
 	bGenX = 0;
 	bGenY = maxBottomHeight;
 
 	tGenX = 0;
 	tGenY = minTopHeight;
-}
+}*/
 
 function checkBorders() {
 	if(speedX > 0 && imgX + img.width >= canvas.width) {
@@ -256,6 +279,25 @@ function checkBorders() {
 	return false;
 }
 
+function tileCollision() {
+	whatColor = levelCtx.getImageData(imgX, imgY, img.width, img.height);
+	for(var x = imgX; x < imgX + img.width; x++) {
+		if(x == imgX || x == imgX + img.width) {
+			for(var y = imgY; y < imgY + img.height; y++) {
+				if(whatColor.data[(x+y)*4+3] != 0) {
+					return true;
+				}	
+			}
+		}
+		else {
+			if(whatColor.data[(x+img.height)*4+3] != 0) {
+				return true;
+			}		
+		}
+	}
+	return false;
+}
+
 function createTile(x, y, row, column) {
 	for(var i = 0; i < tileArray.length; i++) {
 		if(x == tileArray[i].x && y == tileArray[i].y) {
@@ -263,20 +305,31 @@ function createTile(x, y, row, column) {
 		}
 	}
 	
-	var tile = new Tile();
-	tile.x = x;
-	tile.y = y;
-	tile.row = row;
-	tile.column = column;
+	var tile = new Tile(x, y, row, column);
 	
 	return tile;
 }
 
 function deleteTile(tileid) {
-	tileArray[tileid].x = -1;
-	tileArray[tileid].y = -1;
-	tileArray[tileid].row = -1;
-	tileArray[tileid].column = -1;
-	isUsedId[tileid] = false;
-	tileArray[tileid].id = -1;
+	tileArray.splice(tileid, 1);
+}
+
+function createExplosion(x, y) {
+	setTimeout(explosionTimer, 1000/30, x, y, 0, 0);
+}
+
+function explosionTimer(x, y, row, column) {
+	fxCtx.clearRect(x, y, 128, 128);
+	fxCtx.drawImage(expImg, 64*row, 64*column, 64, 64, x, y, 128, 128);
+	
+	if(row == 4 && column == 4) {
+		setTimeout(function(){ fxCtx.clearRect(x, y, 128, 128); }, 1000/15, x, y);
+	}
+	
+	var nextRow = row;
+	var nextColumn = column + 1;
+	
+	if(column == 4) row++;
+	
+	setTimeout(explosionTimer, 1000/15, x, y, nextRow, nextColumn);
 }
