@@ -23,7 +23,7 @@ var tileset = new Image();
 tileset.src = 'tileset.png';
 var tileSize = 16;
 
-var tileArray = [];
+var tileArray = new Array(Math.floor(cWidth/16)*Math.floor(cHeight/16));
 
 //canvas properties
 var canvas = document.getElementById("myCanvas");
@@ -66,7 +66,6 @@ var speedY = 0;
 
 // key map
 var map = [];
-var points = [];
 
 function backingScale(context) {
     if ('devicePixelRatio' in window) {
@@ -86,8 +85,8 @@ window.onload = function() {
 		// update the context for the new canvas scale
 		var ctx = canvas.getContext("2d");
 	}
-	setInterval(update, 1000/60);
-	setInterval(generateLevel, 1000/30);
+	
+	setInterval(update, 1000/45);
 };
 
 $(document).keydown(function(e) {
@@ -127,12 +126,14 @@ function update() {
 	
 	ctx.drawImage(img, imgX, imgY);
 	
+	generateLevel();
 	renderTiles();
 }
 
 function renderTiles() {
 	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
 	for(var i = 0; i < tileArray.length; i++) {
+		if(tileArray[i] == undefined) continue;
 		if(tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
 			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
 		}	
@@ -148,14 +149,16 @@ function generateLevel() {
 	}
 	else if(chance <= 0.50 && bGenY > maxBottomHeight) {
 		bGenY -= 16;
-	}
+	}	
 	
-	createTile(bGenX, bGenY, 3, 1);
-	createTile(bGenX, bGenY+16, 3, 1);
+	createTile(bGenX, bGenY+16, 0, 1);
+	createTile(bGenX, bGenY+16, 1, 1);
+	createTile(bGenX, bGenY+32, 1, 3);
+	createTile(bGenX, bGenY+48, 1, 6);
 	
-	for(var i = minBottomHeight; i > bGenY+16; i -= 16) {
+	for(var i = minBottomHeight; i > bGenY+48; i -= 16) {
 		createTile(bGenX, i, 3, 6);
-	}
+	}	
 	
 	chance = Math.random();
 		
@@ -166,10 +169,12 @@ function generateLevel() {
 		tGenY -= 16;
 	}		
 	
-	createTile(bGenX, tGenY, 3, 1);
-	createTile(bGenX, tGenY-16, 3, 1);
+	createTile(bGenX, tGenY, 1, 4);
+	createTile(bGenX, tGenY-16, 1, 3);
+	createTile(bGenX, tGenY-32, 1, 1);
+	createTile(bGenX, tGenY-48, 1, 8);
 	
-	for(var i = tGenY-16; i >= minTopHeight; i -= 16) {
+	for(var i = tGenY-64; i >= minTopHeight; i -= 16) {
 		createTile(bGenX, i, 3, 6);
 	}
 	
@@ -181,7 +186,7 @@ function generateLevel() {
 
 function scrollLevel() {
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i].id != -1) {
+		if(tileArray[i] != undefined) {
 			tileArray[i].x -= 16;
 			if(tileArray[i].x < 0) deleteTile(i);
 		}	
@@ -193,71 +198,11 @@ function resetShip() {
 	imgY = levelCanvas.height/2;
 }
 
-/*function assignStyle(tileObj) {
-	
-	if(tileObj.y == minBottomHeight || tileObj.y == minTopHeight) {
-		tileObj.row = 3;
-		tileObj.column = 6;
-		return;
-	}	
-	
-	var isLeft = false;
-	var isTop = false;
-	var isRight = false;
-	
-	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i].x == tileObj.x-16 && isAir(i)) {
-			isLeft = true;
-		}
-		if(tileArray[i].y == tileObj.y+16 && isAir(i)) {
-			isTop = true;
-		}
-		if(tileArray[i].x == tileObj.x+16 && isAir(i)) {
-			isRight = true;
-		}
-	}
-	
-	if(isLeft) {
-		tileObj.row = 3;
-		tileObj.column = 0;
-	}
-	
-	if(isTop) {
-		tileObj.row = 1;
-		tileObj.column = 1;
-	}
-	
-	if(isRight) {
-		tileObj.row = 3;
-		tileObj.column = 2;
-	}
-}*/
-
-/*function isAir(tileid) {
-	return tileArray[tileid].row == 4 && tileArray[tileid].column == 2 ? true : false;
-}
-
-function fillAir() {
-	for(var i = 0; i < levelCanvas.width; i += 16) {
-		for(var j = 0; j < levelCanvas.height; j += 16) {
-			createTile(i, j, 4, 2);
-		}
-	}
-}*/
-
 function fillRow(y, tilerow, tilecolumn) {
 	for(var i = 0; i < levelCanvas.width; i += 16) {
 		createTile(i, y, tilerow, tilecolumn);
 	}		
 }
-
-/*function resetGeneration() {
-	bGenX = 0;
-	bGenY = maxBottomHeight;
-
-	tGenX = 0;
-	tGenY = minTopHeight;
-}*/
 
 function checkBorders() {
 	if(speedX > 0 && imgX + img.width >= canvas.width) {
@@ -281,6 +226,7 @@ function checkBorders() {
 
 function tileCollision() {
 	whatColor = levelCtx.getImageData(imgX, imgY, img.width, img.height);
+	
 	for(var x = imgX; x < imgX + img.width; x++) {
 		if(x == imgX || x == imgX + img.width) {
 			for(var y = imgY; y < imgY + img.height; y++) {
@@ -290,7 +236,7 @@ function tileCollision() {
 			}
 		}
 		else {
-			if(whatColor.data[(x+img.height)*4+3] != 0) {
+			if(whatColor.data[(x+imgY+img.height)*4+3] != 0) {
 				return true;
 			}		
 		}
@@ -300,36 +246,46 @@ function tileCollision() {
 
 function createTile(x, y, row, column) {
 	for(var i = 0; i < tileArray.length; i++) {
-		if(x == tileArray[i].x && y == tileArray[i].y) {
-			deleteTile(i);
+		if(tileArray[i] != undefined) {
+			if(x == tileArray[i].x && y == tileArray[i].y) {
+				tileArray[i] = new Tile(x, y, row, column);
+				return tileArray[i];	
+			}
+		}
+		if(tileArray[i] == undefined) {
+			tileArray[i] = new Tile(x, y, row, column);
+			return tileArray[i];
 		}
 	}
+	console.error("Couldn't create tile at [", x, ",", y, "], tile limit reached.");
 	
-	var tile = new Tile(x, y, row, column);
-	
-	return tile;
+	return undefined;
 }
 
 function deleteTile(tileid) {
-	tileArray.splice(tileid, 1);
+	tileArray[tileid] = undefined;
 }
 
 function createExplosion(x, y) {
-	setTimeout(explosionTimer, 1000/30, x, y, 0, 0);
+	setTimeout(explosionTimer, 1000/45, x, y, 0, 0);
 }
 
 function explosionTimer(x, y, row, column) {
 	fxCtx.clearRect(x, y, 128, 128);
-	fxCtx.drawImage(expImg, 64*row, 64*column, 64, 64, x, y, 128, 128);
-	
-	if(row == 4 && column == 4) {
-		setTimeout(function(){ fxCtx.clearRect(x, y, 128, 128); }, 1000/15, x, y);
-	}
+	fxCtx.drawImage(expImg, 64*column, 64*row, 64, 64, x, y, 128, 128);
 	
 	var nextRow = row;
 	var nextColumn = column + 1;
 	
-	if(column == 4) row++;
+	if(column == 4) {
+		nextRow++;
+		nextColumn = 0;
+	}
 	
-	setTimeout(explosionTimer, 1000/15, x, y, nextRow, nextColumn);
+	if(nextRow == 5) {
+		setTimeout(function(){ fxCtx.clearRect(x, y, 128, 128); }, 1000/45, x, y);
+	}
+	else {
+		setTimeout(explosionTimer, 1000/45, x, y, nextRow, nextColumn);	
+	}
 }

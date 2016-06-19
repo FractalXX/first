@@ -1,10 +1,6 @@
-var isUsedId = [];
-
-function Tile(x, y, row, column) {
+function Tile(x, y, row, column, id) {
 	this.x = x;
 	this.y = y;
 	this.row = row;
 	this.column = column;
-	
-	tileArray.push(this);
 }
