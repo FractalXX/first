@@ -14,10 +14,10 @@ img.src = "rocket.png";
 var expImg = new Image();
 expImg.src = "explosion.png";
 
-var imgX = 0;
-var imgY = cHeight/2;
-var oldimgX = imgX;
-var oldimgY = imgY;
+var playerShip;
+
+var oldimgX = 0;
+var oldimgY = 0;
 
 var tileset = new Image();
 tileset.src = 'tileset.png';
@@ -31,6 +31,9 @@ var ctx = canvas.getContext("2d");
 
 var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
+
+var bgCanvas = document.getElementById("background");
+var bgCtx = bgCanvas.getContext("2d");
 
 var fxCanvas = document.getElementById("fx");
 var fxCtx = fxCanvas.getContext("2d");
@@ -49,6 +52,10 @@ levelCanvas.width = cWidth+16;
 levelCanvas.height = cHeight;
 levelCtx.fillStyle = "#000000";
 
+bgCanvas.width = cWidth;
+bgCanvas.height = cHeight;
+bgCtx.fillStyle = "#111111";
+
 fxCanvas.width = cWidth;
 fxCanvas.height = cHeight;
 fxCtx.fillStyle = "#000000";
@@ -59,10 +66,6 @@ var bGenX = 0;
 var bGenY = minBottomHeight-16;
 
 var tGenY = minTopHeight+16;
-
-// speed of rocket
-var speedX = 0;
-var speedY = 0;
 
 // key map
 var map = [];
@@ -86,48 +89,56 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
+	playerShip = new Ship(0, cHeight/2, 100, 50, 0, 0, img);
+	generateFirst();
+	
+	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+	
 	setInterval(update, 1000/45);
 };
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
-	if(e.keyCode == 37) speedX = -4;
-	if(e.keyCode == 39) speedX = 4;
-	if(e.keyCode == 38) speedY = -4;
-	if(e.keyCode == 40) speedY = 4;
+	if(e.keyCode == 37) playerShip.speedX = -4;
+	if(e.keyCode == 39) playerShip.speedX = 4;
+	if(e.keyCode == 38) playerShip.speedY = -4;
+	if(e.keyCode == 40) playerShip.speedY = 4;
 });
 
 $(document).keyup(function(e) {
 	map[e.keyCode] = false;
-	if(!map[37] && !map[39]) speedX = 0;
-	if(!map[38] && !map[40]) speedY = 0;
+	if(!map[37] && !map[39]) playerShip.speedX = 0;
+	if(!map[38] && !map[40]) playerShip.speedY = 0;
 });
 
 function update() {	
-	
-	ctx.clearRect(oldimgX, oldimgY, img.width*scaleFactor, img.height*scaleFactor);
-	ctx.clearRect(imgX, imgY, img.width*scaleFactor, img.height*scaleFactor);
+	generateLevel();
+	renderPlayerShip();
+	renderTiles();
+}
+
+function renderPlayerShip() {
+	ctx.clearRect(oldimgX, oldimgY, playerShip.gfx.width*scaleFactor, playerShip.gfx.height*scaleFactor);
+	ctx.clearRect(playerShip.x, playerShip.y, playerShip.gfx.width*scaleFactor, playerShip.gfx.height*scaleFactor);
 	
 	if(tileCollision()) {
-		createExplosion(imgX, imgY);
+		createExplosion(playerShip.x, playerShip.y);
 		
-		imgX = levelCanvas.width + img.width;
-		imgY = levelCanvas.height + img.height;
+		playerShip.x = levelCanvas.width + img.width;
+		playerShip.y = levelCanvas.height + img.height;
 		
 		setTimeout(resetShip, 2000);
-	}
+	}	
 	
 	if(!checkBorders() && !tileCollision()) {
-		oldimgX = imgX;
-		oldimgY = imgY;
-		imgX += speedX;
-		imgY += speedY;
+		oldimgX = playerShip.x;
+		oldimgY = playerShip.y;
+	
+		playerShip.x += playerShip.speedX;
+		playerShip.y += playerShip.speedY;
 	}
 	
-	ctx.drawImage(img, imgX, imgY);
-	
-	generateLevel();
-	renderTiles();
+	ctx.drawImage(playerShip.gfx, playerShip.x, playerShip.y, playerShip.sizeX, playerShip.sizeY);
 }
 
 function renderTiles() {
@@ -137,6 +148,46 @@ function renderTiles() {
 		if(tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
 			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
 		}	
+	}
+}
+
+function generateFirst() {
+	for(x = 0; x < levelCanvas.width; x += 16) {
+		var chance = Math.random();
+		
+		if(chance <= 0.25 && bGenY < minBottomHeight-32) {
+			bGenY += 16;
+		}
+		else if(chance <= 0.50 && bGenY > maxBottomHeight) {
+			bGenY -= 16;
+		}
+		
+		createTile(x, bGenY+16, 0, 1);
+		createTile(x, bGenY+16, 1, 1);
+		createTile(x, bGenY+32, 1, 3);
+		createTile(x, bGenY+48, 1, 6);
+		
+		for(var i = minBottomHeight; i > bGenY+48; i -= 16) {
+			createTile(x, i, 3, 6);
+		}	
+		
+		chance = Math.random();
+			
+		if(chance <= 0.25 && tGenY < maxTopHeight) {
+			tGenY += 16;
+		}
+		else if(chance <= 0.50 && tGenY > minTopHeight+32) {
+			tGenY -= 16;
+		}		
+		
+		createTile(x, tGenY, 1, 4);
+		createTile(x, tGenY-16, 1, 3);
+		createTile(x, tGenY-32, 1, 1);
+		createTile(x, tGenY-48, 1, 8);
+		
+		for(var i = tGenY-64; i >= minTopHeight; i -= 16) {
+			createTile(x, i, 3, 6);
+		}		
 	}
 }
 
@@ -194,8 +245,8 @@ function scrollLevel() {
 }
 
 function resetShip() {
-	imgX = 0;
-	imgY = levelCanvas.height/2;
+	playerShip.x = 0;
+	playerShip.y = levelCanvas.height/2;
 }
 
 function fillRow(y, tilerow, tilecolumn) {
@@ -205,38 +256,38 @@ function fillRow(y, tilerow, tilecolumn) {
 }
 
 function checkBorders() {
-	if(speedX > 0 && imgX + img.width >= canvas.width) {
-		speedX = 0;
+	if(playerShip.speedX > 0 && playerShip.x + playerShip.gfx.width >= canvas.width) {
+		playerShip.speedX = 0;
 		return true;
 	}
-	if(speedX < 0 && imgX <= 0) {
-		speedX = 0;
+	if(playerShip.speedX < 0 && playerShip.x <= 0) {
+		playerShip.speedX = 0;
 		return true;
 	}
-	if(speedY > 0 && imgY + img.height >= canvas.height) {
-		speedY = 0;
+	if(playerShip.speedY > 0 && playerShip.y + playerShip.gfx.height >= canvas.height) {
+		playerShip.speedY = 0;
 		return true;
 	}
-	if(speedY < 0 && imgY <= 0) {
-		speedY = 0;
+	if(playerShip.speedY < 0 && playerShip.y <= 0) {
+		playerShip.speedY = 0;
 		return true;
 	}	
 	return false;
 }
 
 function tileCollision() {
-	whatColor = levelCtx.getImageData(imgX, imgY, img.width, img.height);
+	whatColor = levelCtx.getImageData(playerShip.x, playerShip.y, playerShip.gfx.width, playerShip.gfx.height);
 	
-	for(var x = imgX; x < imgX + img.width; x++) {
-		if(x == imgX || x == imgX + img.width) {
-			for(var y = imgY; y < imgY + img.height; y++) {
+	for(var x = playerShip.x; x < playerShip.x + playerShip.gfx.width; x++) {
+		if(x == playerShip.x || x == playerShip.x + playerShip.gfx.width) {
+			for(var y = playerShip.y; y < playerShip.y + playerShip.gfx.height; y++) {
 				if(whatColor.data[(x+y)*4+3] != 0) {
 					return true;
 				}	
 			}
 		}
 		else {
-			if(whatColor.data[(x+imgY+img.height)*4+3] != 0) {
+			if(whatColor.data[(x+playerShip.y+playerShip.gfx.height)*4+3] != 0) {
 				return true;
 			}		
 		}
