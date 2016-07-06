@@ -20,7 +20,7 @@ body, html {
 	z-index: 1;
 }
 
-#myCanvas {
+#fireCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;
@@ -28,7 +28,7 @@ body, html {
 	z-index: 2;
 }
 
-#level {
+#myCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;
@@ -36,10 +36,18 @@ body, html {
 	z-index: 3;
 }
 
-#fx {
+#level {
     position:absolute;
 	left: 0px;
 	top: 0px;
 	background-color: transparent;		
 	z-index: 4;
+}
+
+#fx {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 5;
 }

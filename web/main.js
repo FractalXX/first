@@ -7,17 +7,10 @@ var cHeight = window.innerHeight
 || document.documentElement.clientHeight
 || document.body.clientHeight;	
 
-//img properties
-var img = new Image();
-img.src = "rocket.png";
-
 var expImg = new Image();
 expImg.src = "explosion.png";
 
 var playerShip;
-
-var oldimgX = 0;
-var oldimgY = 0;
 
 var tileset = new Image();
 tileset.src = 'tileset.png';
@@ -37,6 +30,9 @@ var bgCtx = bgCanvas.getContext("2d");
 
 var fxCanvas = document.getElementById("fx");
 var fxCtx = fxCanvas.getContext("2d");
+
+var fireCanvas = document.getElementById("fireCanvas");
+var fireCtx = fireCanvas.getContext("2d");
 
 var minBottomHeight = cHeight-16;
 var maxBottomHeight = cHeight-16*12;
@@ -60,12 +56,19 @@ fxCanvas.width = cWidth;
 fxCanvas.height = cHeight;
 fxCtx.fillStyle = "#000000";
 
+fireCanvas.width = cWidth;
+fireCanvas.height = cHeight;
+fireCtx.fillStyle = "#000000";
+
 var colorLayer = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
 
 var bGenX = 0;
 var bGenY = minBottomHeight-16;
 
 var tGenY = minTopHeight+16;
+
+var SHIP_TYPE_PLAYER = 0;
+var SHIP_TYPE_ENEMY = 1;
 
 // key map
 var map = [];
@@ -89,8 +92,9 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
-	playerShip = new Ship(0, cHeight/2, 100, 50, 0, 0, img);
+	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, 0);
 	generateFirst();
+	setTimeout(generateEnemy, 2000);
 	
 	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 	
@@ -113,41 +117,14 @@ $(document).keyup(function(e) {
 
 function update() {	
 	generateLevel();
-	renderPlayerShip();
 	renderTiles();
-}
-
-function renderPlayerShip() {
-	ctx.clearRect(oldimgX, oldimgY, playerShip.gfx.width*scaleFactor, playerShip.gfx.height*scaleFactor);
-	ctx.clearRect(playerShip.x, playerShip.y, playerShip.gfx.width*scaleFactor, playerShip.gfx.height*scaleFactor);
-	
-	if(tileCollision()) {
-		createExplosion(playerShip.x, playerShip.y);
-		
-		playerShip.x = levelCanvas.width + img.width;
-		playerShip.y = levelCanvas.height + img.height;
-		
-		setTimeout(resetShip, 2000);
-	}	
-	
-	if(!checkBorders() && !tileCollision()) {
-		oldimgX = playerShip.x;
-		oldimgY = playerShip.y;
-	
-		playerShip.x += playerShip.speedX;
-		playerShip.y += playerShip.speedY;
-	}
-	
-	ctx.drawImage(playerShip.gfx, playerShip.x, playerShip.y, playerShip.sizeX, playerShip.sizeY);
 }
 
 function renderTiles() {
 	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
 	for(var i = 0; i < tileArray.length; i++) {
 		if(tileArray[i] == undefined) continue;
-		if(tileArray[i].x >= 0 && tileArray[i].x <= levelCanvas.width) {
-			levelCtx.drawImage(tileset, Math.floor(tileArray[i].column * tileSize) + tileArray[i].column, Math.floor(tileArray[i].row * tileSize) + tileArray[i].row, tileSize, tileSize, tileArray[i].x, tileArray[i].y, tileSize, tileSize);
-		}	
+		tileArray[i].render();
 	}
 }
 
@@ -235,6 +212,12 @@ function generateLevel() {
 	
 }
 
+function generateEnemy() {
+	var enemy = new Ship(canvas.width, playerShip.y, 67, 50, 0, 0, 1);
+	
+	setTimeout(generateEnemy, Math.floor((Math.random() * 2000) + 100));
+}
+
 function scrollLevel() {
 	for(var i = 0; i < tileArray.length; i++) {
 		if(tileArray[i] != undefined) {
@@ -244,55 +227,10 @@ function scrollLevel() {
 	}
 }
 
-function resetShip() {
-	playerShip.x = 0;
-	playerShip.y = levelCanvas.height/2;
-}
-
 function fillRow(y, tilerow, tilecolumn) {
 	for(var i = 0; i < levelCanvas.width; i += 16) {
 		createTile(i, y, tilerow, tilecolumn);
 	}		
-}
-
-function checkBorders() {
-	if(playerShip.speedX > 0 && playerShip.x + playerShip.gfx.width >= canvas.width) {
-		playerShip.speedX = 0;
-		return true;
-	}
-	if(playerShip.speedX < 0 && playerShip.x <= 0) {
-		playerShip.speedX = 0;
-		return true;
-	}
-	if(playerShip.speedY > 0 && playerShip.y + playerShip.gfx.height >= canvas.height) {
-		playerShip.speedY = 0;
-		return true;
-	}
-	if(playerShip.speedY < 0 && playerShip.y <= 0) {
-		playerShip.speedY = 0;
-		return true;
-	}	
-	return false;
-}
-
-function tileCollision() {
-	whatColor = levelCtx.getImageData(playerShip.x, playerShip.y, playerShip.gfx.width, playerShip.gfx.height);
-	
-	for(var x = playerShip.x; x < playerShip.x + playerShip.gfx.width; x++) {
-		if(x == playerShip.x || x == playerShip.x + playerShip.gfx.width) {
-			for(var y = playerShip.y; y < playerShip.y + playerShip.gfx.height; y++) {
-				if(whatColor.data[(x+y)*4+3] != 0) {
-					return true;
-				}	
-			}
-		}
-		else {
-			if(whatColor.data[(x+playerShip.y+playerShip.gfx.height)*4+3] != 0) {
-				return true;
-			}		
-		}
-	}
-	return false;
 }
 
 function createTile(x, y, row, column) {
