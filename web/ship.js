@@ -36,13 +36,13 @@ function Ship(x, y, sizeX, sizeY, speedX, speedY, type) {
 	if(this.type == 1) {
 		this.gfx = enemyRocket;
 		this.speedX = -16;
-		setInterval(AI, 1000/15, this);
+		this.aiTimer = setInterval(AI, 1000/15, this);
 	}
 }
 
 Ship.prototype.render = function () {	
-	ctx.clearRect(this.oldimgX, this.oldimgY, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
-	ctx.clearRect(this.x, this.y, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
+	//ctx.clearRect(this.oldimgX, this.oldimgY, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
+	//ctx.clearRect(this.x, this.y, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
 	
 	if(this.isDead) {
 		return;
@@ -52,6 +52,10 @@ Ship.prototype.render = function () {
 		this.kill();
 	}	
 	
+	if(this.shipCollision() && this.type == 0) {
+		this.kill();
+	}
+	
 	if(!this.checkBorders() && !this.tileCollision(this.x, this.y)) {
 		this.oldimgX = this.x;
 		this.oldimgY = this.y;
@@ -60,7 +64,8 @@ Ship.prototype.render = function () {
 		this.y += this.speedY;
 	}
 	
-	ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
+	if(this.type == 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
+	if(this.type == 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	
 	this.fireColumn += 1;
 	
@@ -74,8 +79,6 @@ Ship.prototype.render = function () {
 	}
 	
 	drawFire(this);
-	
-	window.requestAnimationFrame(this.render.bind(this));
 };
 
 Ship.prototype.kill = function() {
@@ -87,17 +90,22 @@ Ship.prototype.kill = function() {
 	this.x = levelCanvas.width;
 	this.y = levelCanvas.height;
 	
-	if(this.type == 1) this.isDead = true;
+	if(this.type == 1) {
+		this.isDead = true;
+		clearInterval(this.aiTimer);
+	} 
+	
+	if(this.type == 1) enemyCtx.clearRect(this.x, this. y, this.gfx.width, this.gfx.height);
 		
 	if(this.type == 0) setTimeout(resetShip, 2000, this);	
 }
 
 Ship.prototype.tileCollision = function(checkX, checkY) {
-	whatColor = levelCtx.getImageData(checkX, checkY, this.gfx.width, this.gfx.height);
+	var whatColor = levelCtx.getImageData(checkX, checkY, this.gfx.width, this.gfx.height);
 	
 	for(var index = 0; index < 4; index++) {
-		var x = checkX + collisionOffsets[index][0];
-		var y = checkY + collisionOffsets[index][1];
+		var x = collisionOffsets[index][0];
+		var y = collisionOffsets[index][1];
 		if(whatColor.data[(x+y)*4+3] !== 0) {
 			return true;
 		}
@@ -117,6 +125,21 @@ Ship.prototype.tileCollision = function(checkX, checkY) {
 			}		
 		}
 	}*/
+	return false;
+}
+
+Ship.prototype.shipCollision = function() {
+	
+	var whatColor = enemyCtx.getImageData(this.x, this.y, this.gfx.width, this.gfx.height);
+	
+	for(var x = 0; x < this.gfx.width; x++) {
+		for(var y = 0; y < this.gfx.height; y++) {
+			if(whatColor.data[(x+y)*4+3] !== 0) {
+				return true;
+			}	
+		}
+	}
+	
 	return false;
 }
 
@@ -161,6 +184,8 @@ function AI(which) {
 function resetShip(which) {
 	which.x = 0;
 	which.y = levelCanvas.height/2;
+	
+	ctx.clearRect(canvas.width, canvas.height, which.gfx.width, which.gfx.height);
 }
 
 function drawFire(which) {
@@ -182,6 +207,5 @@ function drawFire(which) {
 		img = enemyFire;
 	}
 	
-	fireCtx.clearRect(x, y, 160, 64);
 	fireCtx.drawImage(img, 64*which.fireColumn, 64*which.fireRow, 64, 64, x, y, 80, 32);
 }

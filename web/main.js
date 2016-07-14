@@ -7,6 +7,8 @@ var cHeight = window.innerHeight
 || document.documentElement.clientHeight
 || document.body.clientHeight;	
 
+var MAX_SHIPS = 10;
+
 var expImg = new Image();
 expImg.src = "explosion.png";
 
@@ -17,10 +19,14 @@ tileset.src = 'tileset.png';
 var tileSize = 16;
 
 var tileArray = new Array(Math.floor(cWidth/16)*Math.floor(cHeight/16));
+var shipArray = new Array(MAX_SHIPS);
 
 //canvas properties
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
+var enemyCanvas = document.getElementById("enemyCanvas");
+var enemyCtx = enemyCanvas.getContext("2d");
 
 var levelCanvas = document.getElementById("level");
 var levelCtx = levelCanvas.getContext("2d");
@@ -43,6 +49,10 @@ var maxTopHeight = Math.floor(cHeight/16) * 4;
 canvas.width = cWidth;
 canvas.height = cHeight;
 ctx.fillStyle = "#000000";
+
+enemyCanvas.width = cWidth;
+enemyCanvas.height = cHeight;
+enemyCtx.fillStyle = "#000000";
 
 levelCanvas.width = cWidth+16;
 levelCanvas.height = cHeight;
@@ -95,6 +105,7 @@ window.onload = function() {
 	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, 0);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
+	window.requestAnimationFrame(renderShips);
 	
 	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 	
@@ -126,6 +137,26 @@ function renderTiles() {
 		if(tileArray[i] == undefined) continue;
 		tileArray[i].render();
 	}
+}
+
+function renderShips() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	enemyCtx.clearRect(0, 0, enemyCanvas.width, enemyCanvas.height);
+	fireCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+	playerShip.render();
+	
+	for(var i = 0; i < shipArray.length; i++) {
+		if(shipArray[i] != undefined) {
+			if(shipArray[i].isDead || shipArray[i].x < 0) {
+				deleteEnemy(i);
+			}
+			else {
+				shipArray[i].render();
+			}
+		}
+	}
+	
+	window.requestAnimationFrame(renderShips);
 }
 
 function generateFirst() {
@@ -213,7 +244,7 @@ function generateLevel() {
 }
 
 function generateEnemy() {
-	var enemy = new Ship(canvas.width, playerShip.y, 67, 50, 0, 0, 1);
+	createEnemy(canvas.width, playerShip.y);
 	
 	setTimeout(generateEnemy, Math.floor((Math.random() * 2000) + 100));
 }
@@ -253,6 +284,21 @@ function createTile(x, y, row, column) {
 
 function deleteTile(tileid) {
 	tileArray[tileid] = undefined;
+}
+
+function createEnemy(x, y) {
+	for(var i = 0; i < shipArray.length; i++) {
+		if(shipArray[i] == undefined) {
+			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, 1);
+			return shipArray[i];
+		}
+	}
+	return undefined;
+}
+
+function deleteEnemy(enemyid) {
+	clearInterval(shipArray[enemyid].aiTimer);	
+	shipArray[enemyid] = undefined;
 }
 
 function createExplosion(x, y) {

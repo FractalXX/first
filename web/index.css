@@ -36,7 +36,7 @@ body, html {
 	z-index: 3;
 }
 
-#level {
+#enemyCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;
@@ -44,10 +44,18 @@ body, html {
 	z-index: 4;
 }
 
-#fx {
+#level {
     position:absolute;
 	left: 0px;
 	top: 0px;
 	background-color: transparent;		
 	z-index: 5;
+}
+
+#fx {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 6;
 }
