@@ -32,7 +32,7 @@ function Ship(x, y, sizeX, sizeY, speedX, speedY, type) {
 	requestAnimationFrame(this.render.bind(this));
 	drawFire(this, 0, 0);
 	
-	if(this.type == 0) this.gfx = playerRocket;
+	if(this.type === 0) this.gfx = playerRocket;
 	if(this.type == 1) {
 		this.gfx = enemyRocket;
 		this.speedX = -16;
@@ -52,7 +52,7 @@ Ship.prototype.render = function () {
 		this.kill();
 	}	
 	
-	if(this.shipCollision() && this.type == 0) {
+	if(this.shipCollision() && this.type === 0) {
 		this.kill();
 	}
 	
@@ -64,7 +64,7 @@ Ship.prototype.render = function () {
 		this.y += this.speedY;
 	}
 	
-	if(this.type == 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
+	if(this.type === 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	if(this.type == 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	
 	this.fireColumn += 1;
@@ -84,7 +84,7 @@ Ship.prototype.render = function () {
 Ship.prototype.kill = function() {
 	createExplosion(this.x, this.y);
 	
-	if(this.type == 0) fireCtx.clearRect(this.x-48, this.y+10, 160, 64);
+	if(this.type === 0) fireCtx.clearRect(this.x-48, this.y+10, 160, 64);
 	if(this.type == 1) fireCtx.clearRect(this.x+42, this.y+10, 160, 64);
 		
 	this.x = levelCanvas.width;
@@ -97,8 +97,8 @@ Ship.prototype.kill = function() {
 	
 	if(this.type == 1) enemyCtx.clearRect(this.x, this. y, this.gfx.width, this.gfx.height);
 		
-	if(this.type == 0) setTimeout(resetShip, 2000, this);	
-}
+	if(this.type === 0) setTimeout(resetShip, 2000, this);	
+};
 
 Ship.prototype.tileCollision = function(checkX, checkY) {
 	var whatColor = levelCtx.getImageData(checkX, checkY, this.gfx.width, this.gfx.height);
@@ -126,7 +126,7 @@ Ship.prototype.tileCollision = function(checkX, checkY) {
 		}
 	}*/
 	return false;
-}
+};
 
 Ship.prototype.shipCollision = function() {
 	
@@ -141,7 +141,7 @@ Ship.prototype.shipCollision = function() {
 	}
 	
 	return false;
-}
+};
 
 Ship.prototype.checkBorders = function() {
 	if(this.type == 1) return false;
@@ -162,7 +162,7 @@ Ship.prototype.checkBorders = function() {
 		return true;
 	}	
 	return false;
-}
+};
 
 function AI(which) {
 	if(Math.random() <= 0.5) {
@@ -193,7 +193,7 @@ function drawFire(which) {
 	var y = which.y;
 	var img;	
 	
-	if(which.type == 0) {
+	if(which.type === 0) {
 		x -= 48;
 		y += 10;
 		
