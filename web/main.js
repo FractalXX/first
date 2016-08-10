@@ -98,7 +98,7 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
-	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, 0);
+	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
 	window.requestAnimationFrame(renderShips);
@@ -128,7 +128,7 @@ function update() {
 }
 
 function renderTiles() {
-	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
+	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
 	for(var i = 0; i < tileArray.length; i++) {
 		if(tileArray[i] === undefined) continue;
 		tileArray[i].render();
@@ -287,7 +287,7 @@ function deleteTile(tileid) {
 function createEnemy(x, y) {
 	for(var i = 0; i < shipArray.length; i++) {
 		if(shipArray[i] === undefined) {
-			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, 1);
+			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, SHIP_TYPE_ENEMY);
 			return shipArray[i];
 		}
 	}

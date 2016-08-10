@@ -103,40 +103,25 @@ Ship.prototype.kill = function() {
 Ship.prototype.tileCollision = function(checkX, checkY) {
 	var whatColor = levelCtx.getImageData(checkX, checkY, this.gfx.width, this.gfx.height);
 	
-	for(var index = 0; index < 4; index++) {
+	for(var index = 0; index < 4; index++) {	
 		var x = collisionOffsets[index][0];
 		var y = collisionOffsets[index][1];
-		if(whatColor.data[(x+y)*4+3] !== 0) {
+		if(whatColor.data[((this.gfx.width * y) + x) * 4 + 3] !== 0) {
 			return true;
 		}
 	}
 	
-	/*for(var x = this.x; x < this.x + this.gfx.width; x++) {
-		if(x === this.x || x === this.x + this.gfx.width - 1) {
-			for(var y = this.y; y < this.y + this.gfx.height; y++) {
-				if(whatColor.data[(x+y)*4+3] !== 0) {
-					return true;
-				}	
-			}
-		}
-		else {
-			if(whatColor.data[(x+this.y+this.gfx.height)*4+3] !== 0) {
-				return true;
-			}		
-		}
-	}*/
 	return false;
 };
 
 Ship.prototype.shipCollision = function() {
-	
 	var whatColor = enemyCtx.getImageData(this.x, this.y, this.gfx.width, this.gfx.height);
 	
-	for(var x = 0; x < this.gfx.width; x++) {
-		for(var y = 0; y < this.gfx.height; y++) {
-			if(whatColor.data[(x+y)*4+3] !== 0) {
-				return true;
-			}	
+	for(var index = 0; index < 4; index++) {
+		var x = collisionOffsets[index][0];
+		var y = collisionOffsets[index][1];
+		if(whatColor.data[((this.gfx.width * y) + x) * 4 + 3] !== 0) {
+			return true;
 		}
 	}
 	
