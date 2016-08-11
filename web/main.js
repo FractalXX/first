@@ -1,11 +1,7 @@
 //resolution stuff
-var cWidth = window.innerWidth
-|| document.documentElement.clientWidth
-|| document.body.clientWidth;
+var cWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 
-var cHeight = window.innerHeight
-|| document.documentElement.clientHeight
-|| document.body.clientHeight;	
+var cHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;	
 
 var MAX_SHIPS = 10;
 
@@ -102,7 +98,7 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
-	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, 0);
+	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
 	window.requestAnimationFrame(renderShips);
@@ -132,9 +128,9 @@ function update() {
 }
 
 function renderTiles() {
-	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);	
+	levelCtx.clearRect(0, 0, levelCanvas.width, levelCanvas.height);
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i] == undefined) continue;
+		if(tileArray[i] === undefined) continue;
 		tileArray[i].render();
 	}
 }
@@ -146,7 +142,7 @@ function renderShips() {
 	playerShip.render();
 	
 	for(var i = 0; i < shipArray.length; i++) {
-		if(shipArray[i] != undefined) {
+		if(shipArray[i] !== undefined) {
 			if(shipArray[i].isDead || shipArray[i].x < 0) {
 				deleteEnemy(i);
 			}
@@ -162,6 +158,7 @@ function renderShips() {
 function generateFirst() {
 	for(x = 0; x < levelCanvas.width; x += 16) {
 		var chance = Math.random();
+		var i;
 		
 		if(chance <= 0.25 && bGenY < minBottomHeight-32) {
 			bGenY += 16;
@@ -175,7 +172,7 @@ function generateFirst() {
 		createTile(x, bGenY+32, 1, 3);
 		createTile(x, bGenY+48, 1, 6);
 		
-		for(var i = minBottomHeight; i > bGenY+48; i -= 16) {
+		for(i = minBottomHeight; i > bGenY+48; i -= 16) {
 			createTile(x, i, 3, 6);
 		}	
 		
@@ -193,7 +190,7 @@ function generateFirst() {
 		createTile(x, tGenY-32, 1, 1);
 		createTile(x, tGenY-48, 1, 8);
 		
-		for(var i = tGenY-64; i >= minTopHeight; i -= 16) {
+		for(i = tGenY-64; i >= minTopHeight; i -= 16) {
 			createTile(x, i, 3, 6);
 		}		
 	}
@@ -202,6 +199,7 @@ function generateFirst() {
 function generateLevel() {
 	
 	var chance = Math.random();
+	var i;
 	
 	if(chance <= 0.25 && bGenY < minBottomHeight-32) {
 		bGenY += 16;
@@ -215,7 +213,7 @@ function generateLevel() {
 	createTile(bGenX, bGenY+32, 1, 3);
 	createTile(bGenX, bGenY+48, 1, 6);
 	
-	for(var i = minBottomHeight; i > bGenY+48; i -= 16) {
+	for(i = minBottomHeight; i > bGenY+48; i -= 16) {
 		createTile(bGenX, i, 3, 6);
 	}	
 	
@@ -233,7 +231,7 @@ function generateLevel() {
 	createTile(bGenX, tGenY-32, 1, 1);
 	createTile(bGenX, tGenY-48, 1, 8);
 	
-	for(var i = tGenY-64; i >= minTopHeight; i -= 16) {
+	for(i = tGenY-64; i >= minTopHeight; i -= 16) {
 		createTile(bGenX, i, 3, 6);
 	}
 	
@@ -251,7 +249,7 @@ function generateEnemy() {
 
 function scrollLevel() {
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i] != undefined) {
+		if(tileArray[i] !== undefined) {
 			tileArray[i].x -= 16;
 			if(tileArray[i].x < 0) deleteTile(i);
 		}	
@@ -266,13 +264,13 @@ function fillRow(y, tilerow, tilecolumn) {
 
 function createTile(x, y, row, column) {
 	for(var i = 0; i < tileArray.length; i++) {
-		if(tileArray[i] != undefined) {
+		if(tileArray[i] !== undefined) {
 			if(x == tileArray[i].x && y == tileArray[i].y) {
 				tileArray[i] = new Tile(x, y, row, column);
 				return tileArray[i];	
 			}
 		}
-		if(tileArray[i] == undefined) {
+		if(tileArray[i] === undefined) {
 			tileArray[i] = new Tile(x, y, row, column);
 			return tileArray[i];
 		}
@@ -288,8 +286,8 @@ function deleteTile(tileid) {
 
 function createEnemy(x, y) {
 	for(var i = 0; i < shipArray.length; i++) {
-		if(shipArray[i] == undefined) {
-			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, 1);
+		if(shipArray[i] === undefined) {
+			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, SHIP_TYPE_ENEMY);
 			return shipArray[i];
 		}
 	}
