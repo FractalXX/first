@@ -34,7 +34,7 @@ function Ship(x, y, sizeX, sizeY, speedX, speedY, type) {
 	if(this.type === 0) this.gfx = playerRocket;
 	if(this.type === 1) {
 		this.gfx = enemyRocket;
-		this.speedX = -16;
+		this.speedX = gameSteps * -4;
 		this.aiTimer = setInterval(AI, 1000/15, this);
 	}
 }
@@ -47,19 +47,16 @@ Ship.prototype.render = function () {
 		return;
 	} 
 	
-	if(this.tileCollision(this.x, this.y) || (this.shipCollision() && this.type === 0)) {
+	if(this.tileCollision(this.x, this.y) || (this.type === 0 && this.shipCollision())) {
 		this.kill();
-	}	
-	
-	//console.log(this.shipCollision.bind(this));
-	
-	if(!this.checkBorders() && !this.tileCollision(this.x, this.y)) {
-		this.oldimgX = this.x;
+	} else {
+        this.oldimgX = this.x;
 		this.oldimgY = this.y;
 	
 		this.x += this.speedX;
 		this.y += this.speedY;
-	}
+    }
+	
 	
 	if(this.type === 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	if(this.type === 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
@@ -148,18 +145,18 @@ Ship.prototype.checkBorders = function() {
 
 function AI(which) {
 	if(Math.random() <= 0.5) {
-		which.speedX = -16;
+		which.speedX = gameSteps * -4;
 		which.speedY = 0;
 	}	
 	
 	if(which.tileCollision(which.x-32, which.y+32)) {
 		which.speedX = 0;
-		which.speedY = -4;
+		which.speedY = -gameSteps;
 	}
 	
 	if(which.tileCollision(which.x-32, which.y-32)) {
 		which.speedX = 0;
-		which.speedY = 4;
+		which.speedY = gameSteps;
 	}
 }
 
