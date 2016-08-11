@@ -36,6 +36,9 @@ var fxCtx = fxCanvas.getContext("2d");
 var fireCanvas = document.getElementById("fireCanvas");
 var fireCtx = fireCanvas.getContext("2d");
 
+var lightCanvas = document.getElementById("lightCanvas");
+var lightCtx = lightCanvas.getContext("2d");
+
 var minBottomHeight = cHeight-16;
 var maxBottomHeight = cHeight-16*12;
 
@@ -66,7 +69,9 @@ fireCanvas.width = cWidth;
 fireCanvas.height = cHeight;
 fireCtx.fillStyle = "#000000";
 
-var colorLayer = levelCtx.createImageData(levelCanvas.width, levelCanvas.height);
+lightCanvas.width = cWidth;
+lightCanvas.height = cHeight;
+lightCtx.fillStyle = "#000000";
 
 var bGenX = 0;
 var bGenY = minBottomHeight-16;
@@ -101,9 +106,16 @@ window.onload = function() {
 	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
-	window.requestAnimationFrame(renderShips);
 	
 	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+	
+	lightCtx.globalCompositeOperation = "soft-light";
+	var gradient = lightCtx.createLinearGradient(0, 0, 0, lightCanvas.height);
+	gradient.addColorStop(0, "rgba(0, 0, 0, 1.0)");
+	gradient.addColorStop(0.5, "rgba(0, 0, 0, 0)");
+	gradient.addColorStop(1, "rgba(0, 0, 0, 1.0)");
+	lightCtx.fillStyle = gradient;
+	lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
 	
 	setInterval(update, 1000/45);
 };
@@ -125,6 +137,7 @@ $(document).keyup(function(e) {
 function update() {	
 	generateLevel();
 	renderTiles();
+	renderShips();
 }
 
 function renderTiles() {
@@ -151,8 +164,6 @@ function renderShips() {
 			}
 		}
 	}
-	
-	window.requestAnimationFrame(renderShips);
 }
 
 function generateFirst() {
