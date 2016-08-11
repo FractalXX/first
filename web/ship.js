@@ -29,11 +29,10 @@ function Ship(x, y, sizeX, sizeY, speedX, speedY, type) {
 	this.fireRow = 0;
 	this.fireColumn = 0;
 	
-	requestAnimationFrame(this.render.bind(this));
 	drawFire(this, 0, 0);
 	
 	if(this.type === 0) this.gfx = playerRocket;
-	if(this.type == 1) {
+	if(this.type === 1) {
 		this.gfx = enemyRocket;
 		this.speedX = -16;
 		this.aiTimer = setInterval(AI, 1000/15, this);
@@ -48,13 +47,11 @@ Ship.prototype.render = function () {
 		return;
 	} 
 	
-	if(this.tileCollision(this.x, this.y)) {
+	if(this.tileCollision(this.x, this.y) || (this.shipCollision() && this.type === 0)) {
 		this.kill();
 	}	
 	
-	if(this.shipCollision() && this.type === 0) {
-		this.kill();
-	}
+	//console.log(this.shipCollision.bind(this));
 	
 	if(!this.checkBorders() && !this.tileCollision(this.x, this.y)) {
 		this.oldimgX = this.x;
@@ -65,16 +62,16 @@ Ship.prototype.render = function () {
 	}
 	
 	if(this.type === 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
-	if(this.type == 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
+	if(this.type === 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	
 	this.fireColumn += 1;
 	
-	if(this.fireColumn == 4) {
+	if(this.fireColumn === 4) {
 		this.fireColumn = 0;
 		this.fireRow += 1;
 	}	
 	
-	if(this.fireRow == 4) {
+	if(this.fireRow === 4) {
 		this.fireRow = 0;
 	}
 	
@@ -85,17 +82,17 @@ Ship.prototype.kill = function() {
 	createExplosion(this.x, this.y);
 	
 	if(this.type === 0) fireCtx.clearRect(this.x-48, this.y+10, 160, 64);
-	if(this.type == 1) fireCtx.clearRect(this.x+42, this.y+10, 160, 64);
+	if(this.type === 1) fireCtx.clearRect(this.x+42, this.y+10, 160, 64);
 		
 	this.x = levelCanvas.width;
 	this.y = levelCanvas.height;
 	
-	if(this.type == 1) {
+	if(this.type === 1) {
 		this.isDead = true;
 		clearInterval(this.aiTimer);
 	} 
 	
-	if(this.type == 1) enemyCtx.clearRect(this.x, this. y, this.gfx.width, this.gfx.height);
+	if(this.type === 1) enemyCtx.clearRect(this.x, this. y, this.gfx.width, this.gfx.height);
 		
 	if(this.type === 0) setTimeout(resetShip, 2000, this);	
 };
@@ -129,7 +126,7 @@ Ship.prototype.shipCollision = function() {
 };
 
 Ship.prototype.checkBorders = function() {
-	if(this.type == 1) return false;
+	if(this.type === 1) return false;
 	if(this.speedX > 0 && this.x + this.gfx.width >= canvas.width) {
 		this.speedX = 0;
 		return true;
@@ -185,7 +182,7 @@ function drawFire(which) {
 		img = rocketFire;
 	}
 	
-	if(which.type == 1) {
+	if(which.type === 1) {
 		x += 42;
 		y += 10;
 		
