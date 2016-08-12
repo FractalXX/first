@@ -4,6 +4,10 @@ var cWidth = window.innerWidth || document.documentElement.clientWidth || docume
 var cHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;	
 
 var MAX_SHIPS = 10;
+var gameSpeed = 45;
+var gameIntervalId;
+var debugLog = false;
+var gameSteps = 4;
 
 var expImg = new Image();
 expImg.src = "explosion.png";
@@ -103,7 +107,7 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
-	playerShip = new Ship(0, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
+	playerShip = new Ship(15, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
 	
@@ -117,15 +121,43 @@ window.onload = function() {
 	lightCtx.fillStyle = gradient;
 	lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
 	
-	setInterval(update, 1000/45);
+	gameIntervalId = setInterval(update, 1000/gameSpeed);
 };
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
-	if(e.keyCode == 37) playerShip.speedX = -4;
-	if(e.keyCode == 39) playerShip.speedX = 4;
-	if(e.keyCode == 38) playerShip.speedY = -4;
-	if(e.keyCode == 40) playerShip.speedY = 4;
+    switch (e.keyCode) {
+        case 37:
+            playerShip.speedX = -gameSteps;
+            break;
+        case 39:
+            playerShip.speedX = gameSteps;
+            break;
+        case 38:
+            playerShip.speedY = -gameSteps;
+            break;
+        case 40:
+            playerShip.speedY = gameSteps;
+            break;
+        case 83:
+            // press S to slow game down
+            gameSpeed = (gameSpeed === 1 ? 45 : 1);
+            clearInterval(gameIntervalId);
+            gameIntervalId = setInterval(update, 1000/gameSpeed);
+            debugLog = !debugLog;
+            break;
+        case 80:
+            // press P for pause
+            if (gameIntervalId) {
+                clearInterval(gameIntervalId);
+                gameIntervalId = null;
+            } else {
+                gameIntervalId = setInterval(update, 1000/gameSpeed);
+            }
+            break;
+        default:
+            console.log("No key handler for " + e.keyCode);
+    }
 });
 
 $(document).keyup(function(e) {
@@ -150,12 +182,12 @@ function renderTiles() {
 
 function renderShips() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	enemyCtx.clearRect(0, 0, enemyCanvas.width, enemyCanvas.height);
 	fireCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
 	playerShip.render();
+    enemyCtx.clearRect(0, 0, enemyCanvas.width, enemyCanvas.height);    // you cleared enemyCtx before checking for enemies
 	
 	for(var i = 0; i < shipArray.length; i++) {
-		if(shipArray[i] !== undefined) {
+		if(shipArray[i]) {
 			if(shipArray[i].isDead || shipArray[i].x < 0) {
 				deleteEnemy(i);
 			}
@@ -297,7 +329,7 @@ function deleteTile(tileid) {
 
 function createEnemy(x, y) {
 	for(var i = 0; i < shipArray.length; i++) {
-		if(shipArray[i] === undefined) {
+		if(!shipArray[i]) {
 			shipArray[i] = new Ship(x, y, 67, 50, 0, 0, SHIP_TYPE_ENEMY);
 			return shipArray[i];
 		}
