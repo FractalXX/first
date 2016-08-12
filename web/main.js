@@ -1,3 +1,5 @@
+var glSupport = false; //for further use
+
 //resolution stuff
 var cWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 
@@ -29,6 +31,8 @@ var bgCanvas = document.createElement('canvas');
 var fxCanvas = document.createElement('canvas');
 var fireCanvas = document.createElement('canvas');
 var lightCanvas = document.createElement('canvas');
+
+var glCanvas = document.createElement('canvas');
 
 var screenCanvas = document.getElementById("onScreen");
 var screenCtx = screenCanvas.getContext("2d");
@@ -78,6 +82,9 @@ screenCanvas.width = cWidth;
 screenCanvas.height = cHeight;
 screenCtx.fillStyle = "#000000";
 
+glCanvas.width = cWidth;
+glCanvas.height = cHeight;
+
 var bGenX = 0;
 var bGenY = minBottomHeight-16;
 
@@ -110,7 +117,7 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
-	initializeGL();
+	if(glSupport) initializeGL();
 	
 	playerShip = new Ship(15, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
@@ -132,18 +139,22 @@ window.onload = function() {
 };
 
 function initializeGL() {
-	gl = screenCanvas.getContext("webgl") || screenCanvas.getContext("experimental-webgl") || screenCanvas.getContext("webgl2") || screenCanvas.getContext("experimental-webgl2");
+	gl = glCanvas.getContext("webgl") || glCanvas.getContext("experimental-webgl") || glCanvas.getContext("webkit-3d") || glCanvas.getContext("moz-webgl");
   
 	if (!gl) {
 		alert("Unable to initialize WebGL. Your browser may not support it or it's disabled.");
 		return;
 	}
 	
-    gl.viewportWidth = screenCanvas.width;
-    gl.viewportHeight = screenCanvas.height;		
+	gl.getSupportedExtensions();
+	
+    gl.viewportWidth = glCanvas.width;
+    gl.viewportHeight = glCanvas.height;		
 
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	
 }
 
 $(document).keydown(function(e) {
@@ -206,11 +217,9 @@ function renderOnScreen() {
 		screenCtx.drawImage(levelCanvas, 0, 0);
 		screenCtx.drawImage(fxCanvas, 0, 0);
 		screenCtx.drawImage(lightCanvas, 0, 0);		
-	}
-	else {
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.screenCanvas);	
-		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);		
+	}	
+	if(gl) {
+		//webGL code would go here
 	}
 	
 	window.requestAnimationFrame(renderOnScreen);
