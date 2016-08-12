@@ -86,7 +86,7 @@ var tGenY = minTopHeight+16;
 var SHIP_TYPE_PLAYER = 0;
 var SHIP_TYPE_ENEMY = 1;
 
-var gl;
+var gl = null;
 
 // key map
 var map = [];
@@ -132,15 +132,17 @@ window.onload = function() {
 };
 
 function initializeGL() {
-	gl = initWebGL(screenCanvas);
-	  
+	gl = screenCanvas.getContext("webgl") || screenCanvas.getContext("experimental-webgl") || screenCanvas.getContext("webgl2") || screenCanvas.getContext("experimental-webgl2");
+  
 	if (!gl) {
+		alert("Unable to initialize WebGL. Your browser may not support it or it's disabled.");
 		return;
 	}
+	
+    gl.viewportWidth = screenCanvas.width;
+    gl.viewportHeight = screenCanvas.height;		
 
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.LEQUAL);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
@@ -207,6 +209,8 @@ function renderOnScreen() {
 	}
 	else {
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.screenCanvas);	
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);		
 	}
 	
 	window.requestAnimationFrame(renderOnScreen);
@@ -404,16 +408,4 @@ function explosionTimer(x, y, row, column) {
 	else {
 		setTimeout(explosionTimer, 1000/45, x, y, nextRow, nextColumn);	
 	}
-}
-
-function initWebGL(canvas) {
-  gl = null;
- 
-  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-  
-  if (!gl) {
-    alert("Unable to initialize WebGL. Your browser may not support it.");
-  }
-  
-  return gl;
 }
