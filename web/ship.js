@@ -40,23 +40,10 @@ function Ship(x, y, sizeX, sizeY, speedX, speedY, type) {
 }
 
 Ship.prototype.render = function () {	
-	//ctx.clearRect(this.oldimgX, this.oldimgY, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
-	//ctx.clearRect(this.x, this.y, this.gfx.width*scaleFactor, this.gfx.height*scaleFactor);
-	
+
 	if(this.isDead) {
 		return;
 	} 
-	
-	if(this.tileCollision(this.x, this.y) || (this.type === 0 && this.shipCollision())) {
-		this.kill();
-	} else {
-        this.oldimgX = this.x;
-		this.oldimgY = this.y;
-	
-		this.x += this.speedX;
-		this.y += this.speedY;
-    }
-	
 	
 	if(this.type === 0) ctx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
 	if(this.type === 1) enemyCtx.drawImage(this.gfx, this.x, this.y, this.sizeX, this.sizeY);	
@@ -72,7 +59,18 @@ Ship.prototype.render = function () {
 		this.fireRow = 0;
 	}
 	
-	drawFire(this);
+	drawFire(this);	
+	
+	if(this.tileCollision(this.x, this.y) || (this.type === 0 && this.shipCollision())) {
+		this.kill();
+	} else {
+        this.oldimgX = this.x;
+		this.oldimgY = this.y;
+	
+		this.x += this.speedX;
+		this.y += this.speedY;
+    }	
+	
 };
 
 Ship.prototype.kill = function() {

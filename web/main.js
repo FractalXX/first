@@ -86,6 +86,8 @@ var tGenY = minTopHeight+16;
 var SHIP_TYPE_PLAYER = 0;
 var SHIP_TYPE_ENEMY = 1;
 
+var gl;
+
 // key map
 var map = [];
 
@@ -108,6 +110,8 @@ window.onload = function() {
 		var ctx = canvas.getContext("2d");
 	}
 	
+	initializeGL();
+	
 	playerShip = new Ship(15, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
 	setTimeout(generateEnemy, 2000);
@@ -126,6 +130,19 @@ window.onload = function() {
 	
 	gameIntervalId = setInterval(update, 1000/gameSpeed);
 };
+
+function initializeGL() {
+	gl = initWebGL(screenCanvas);
+	  
+	if (!gl) {
+		return;
+	}
+
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
@@ -176,15 +193,21 @@ function update() {
 }
 
 function renderOnScreen() {
-	screenCtx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
 	
-	screenCtx.drawImage(bgCanvas, 0, 0);
-	screenCtx.drawImage(fireCanvas, 0, 0);
-	screenCtx.drawImage(canvas, 0, 0);
-	screenCtx.drawImage(enemyCanvas, 0, 0);
-	screenCtx.drawImage(levelCanvas, 0, 0);
-	screenCtx.drawImage(fxCanvas, 0, 0);
-	screenCtx.drawImage(lightCanvas, 0, 0);
+	if(!gl) {
+		screenCtx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
+		
+		screenCtx.drawImage(bgCanvas, 0, 0);
+		screenCtx.drawImage(fireCanvas, 0, 0);
+		screenCtx.drawImage(canvas, 0, 0);
+		screenCtx.drawImage(enemyCanvas, 0, 0);
+		screenCtx.drawImage(levelCanvas, 0, 0);
+		screenCtx.drawImage(fxCanvas, 0, 0);
+		screenCtx.drawImage(lightCanvas, 0, 0);		
+	}
+	else {
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.screenCanvas);	
+	}
 	
 	window.requestAnimationFrame(renderOnScreen);
 }
@@ -381,4 +404,16 @@ function explosionTimer(x, y, row, column) {
 	else {
 		setTimeout(explosionTimer, 1000/45, x, y, nextRow, nextColumn);	
 	}
+}
+
+function initWebGL(canvas) {
+  gl = null;
+ 
+  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  
+  if (!gl) {
+    alert("Unable to initialize WebGL. Your browser may not support it.");
+  }
+  
+  return gl;
 }
