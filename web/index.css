@@ -6,64 +6,10 @@ body, html {
 	overflow: hidden;
 }
 
-.stage {
-	width: 600px;
-    height: 300px;
-    position: relative;
-}
-
-#background {
+#screenCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;
 	background-color: transparent;		
-	z-index: 1;
-}
-
-#fireCanvas {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 2;
-}
-
-#myCanvas {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 3;
-}
-
-#enemyCanvas {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 4;
-}
-
-#level {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 5;
-}
-
-#fx {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 6;
-}
-
-#lightCanvas {
-    position:absolute;
-	left: 0px;
-	top: 0px;
-	background-color: transparent;		
-	z-index: 7;
+	z-index: 0;
 }

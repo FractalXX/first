@@ -22,26 +22,16 @@ var tileArray = new Array(Math.floor(cWidth/16)*Math.floor(cHeight/16));
 var shipArray = new Array(MAX_SHIPS);
 
 //canvas properties
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
+var canvas = document.createElement('canvas');
+var enemyCanvas = document.createElement('canvas');
+var levelCanvas = document.createElement('canvas');
+var bgCanvas = document.createElement('canvas');
+var fxCanvas = document.createElement('canvas');
+var fireCanvas = document.createElement('canvas');
+var lightCanvas = document.createElement('canvas');
 
-var enemyCanvas = document.getElementById("enemyCanvas");
-var enemyCtx = enemyCanvas.getContext("2d");
-
-var levelCanvas = document.getElementById("level");
-var levelCtx = levelCanvas.getContext("2d");
-
-var bgCanvas = document.getElementById("background");
-var bgCtx = bgCanvas.getContext("2d");
-
-var fxCanvas = document.getElementById("fx");
-var fxCtx = fxCanvas.getContext("2d");
-
-var fireCanvas = document.getElementById("fireCanvas");
-var fireCtx = fireCanvas.getContext("2d");
-
-var lightCanvas = document.getElementById("lightCanvas");
-var lightCtx = lightCanvas.getContext("2d");
+var screenCanvas = document.getElementById("onScreen");
+var screenCtx = screenCanvas.getContext("2d");
 
 var minBottomHeight = cHeight-16;
 var maxBottomHeight = cHeight-16*12;
@@ -51,31 +41,42 @@ var maxTopHeight = Math.floor(cHeight/16) * 4;
 
 canvas.width = cWidth;
 canvas.height = cHeight;
+var ctx = canvas.getContext("2d");
 ctx.fillStyle = "#000000";
 
 enemyCanvas.width = cWidth;
 enemyCanvas.height = cHeight;
+var enemyCtx = enemyCanvas.getContext("2d");
 enemyCtx.fillStyle = "#000000";
 
 levelCanvas.width = cWidth+16;
 levelCanvas.height = cHeight;
+var levelCtx = levelCanvas.getContext("2d");
 levelCtx.fillStyle = "#000000";
 
 bgCanvas.width = cWidth;
 bgCanvas.height = cHeight;
+var bgCtx = bgCanvas.getContext("2d");
 bgCtx.fillStyle = "#111111";
 
 fxCanvas.width = cWidth;
 fxCanvas.height = cHeight;
+var fxCtx = fxCanvas.getContext("2d");
 fxCtx.fillStyle = "#000000";
 
 fireCanvas.width = cWidth;
 fireCanvas.height = cHeight;
+var fireCtx = fireCanvas.getContext("2d");
 fireCtx.fillStyle = "#000000";
 
 lightCanvas.width = cWidth;
 lightCanvas.height = cHeight;
+var lightCtx = lightCanvas.getContext("2d");
 lightCtx.fillStyle = "#000000";
+
+screenCanvas.width = cWidth;
+screenCanvas.height = cHeight;
+screenCtx.fillStyle = "#000000";
 
 var bGenX = 0;
 var bGenY = minBottomHeight-16;
@@ -120,6 +121,8 @@ window.onload = function() {
 	gradient.addColorStop(1, "rgba(0, 0, 0, 0.5)");
 	lightCtx.fillStyle = gradient;
 	lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
+	
+	window.requestAnimationFrame(renderOnScreen);
 	
 	gameIntervalId = setInterval(update, 1000/gameSpeed);
 };
@@ -170,6 +173,20 @@ function update() {
 	generateLevel();
 	renderTiles();
 	renderShips();
+}
+
+function renderOnScreen() {
+	screenCtx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
+	
+	screenCtx.drawImage(bgCanvas, 0, 0);
+	screenCtx.drawImage(fireCanvas, 0, 0);
+	screenCtx.drawImage(canvas, 0, 0);
+	screenCtx.drawImage(enemyCanvas, 0, 0);
+	screenCtx.drawImage(levelCanvas, 0, 0);
+	screenCtx.drawImage(fxCanvas, 0, 0);
+	screenCtx.drawImage(lightCanvas, 0, 0);
+	
+	window.requestAnimationFrame(renderOnScreen);
 }
 
 function renderTiles() {
