@@ -113,11 +113,11 @@ window.onload = function() {
 	
 	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 	
-	lightCtx.globalCompositeOperation = "soft-light";
+	lightCtx.globalCompositeOperation = "lighter";
 	var gradient = lightCtx.createLinearGradient(0, 0, 0, lightCanvas.height);
-	gradient.addColorStop(0, "rgba(0, 0, 0, 1.0)");
+	gradient.addColorStop(0, "rgba(0, 0, 0, 0.5)");
 	gradient.addColorStop(0.5, "rgba(0, 0, 0, 0)");
-	gradient.addColorStop(1, "rgba(0, 0, 0, 1.0)");
+	gradient.addColorStop(1, "rgba(0, 0, 0, 0.5)");
 	lightCtx.fillStyle = gradient;
 	lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
 	
