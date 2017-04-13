@@ -1,5 +1,5 @@
 {
-  "name": "Cave Ship",
+  "name": "caveship",
   "version": "0.2.0",
   "description": "nothing",
   "main": "server.js",
