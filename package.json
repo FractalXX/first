@@ -2,9 +2,9 @@
   "name": "Cave Ship",
   "version": "0.2.0",
   "description": "nothing",
-  "main": "first.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": "5.11.1"
