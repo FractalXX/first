@@ -6,7 +6,47 @@ body, html {
 	overflow: hidden;
 }
 
-#screenCanvas {
+#MainCanvas {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 5;
+}
+
+#EnemyCanvas {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 4;
+}
+
+#LevelCanvas {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 3;
+}
+
+#FxCanvas {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 2;
+}
+
+#FireCanvas {
+    position:absolute;
+	left: 0px;
+	top: 0px;
+	background-color: transparent;		
+	z-index: 1;
+}
+
+#BackgroundCanvas {
     position:absolute;
 	left: 0px;
 	top: 0px;

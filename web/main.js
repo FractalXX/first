@@ -1,9 +1,9 @@
-var glSupport = false; //for further use
-
 //resolution stuff
 var cWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 
-var cHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;	
+var cHeight = window.innerHeight ||
+    document.documentElement.clientHeight ||
+    document.body.clientHeight;
 
 var MAX_SHIPS = 10;
 var gameSpeed = 45;
@@ -20,31 +20,26 @@ var tileset = new Image();
 tileset.src = 'tileset.png';
 var tileSize = 16;
 
-var tileArray = new Array(Math.floor(cWidth/16)*Math.floor(cHeight/16));
+var tileArray = new Array(Math.floor(cWidth / 16) * Math.floor(cHeight / 16));
 var shipArray = new Array(MAX_SHIPS);
 
 //canvas properties
-var canvas = document.createElement('canvas');
-var enemyCanvas = document.createElement('canvas');
-var levelCanvas = document.createElement('canvas');
-var bgCanvas = document.createElement('canvas');
-var fxCanvas = document.createElement('canvas');
-var fireCanvas = document.createElement('canvas');
-var lightCanvas = document.createElement('canvas');
+var canvas = document.getElementById("MainCanvas");
+var enemyCanvas = document.getElementById("EnemyCanvas");
+var levelCanvas = document.getElementById("LevelCanvas");
+var bgCanvas = document.getElementById("BackgroundCanvas");
+var fxCanvas = document.getElementById("FxCanvas");
+var fireCanvas = document.getElementById("FireCanvas");
 
-var glCanvas = document.createElement('canvas');
-
-var screenCanvas = document.getElementById("onScreen");
-var screenCtx = screenCanvas.getContext("2d");
-
-var minBottomHeight = cHeight-16;
-var maxBottomHeight = cHeight-16*12;
+var minBottomHeight = cHeight - 16;
+var maxBottomHeight = cHeight - 16 * 12;
 
 var minTopHeight = 0;
-var maxTopHeight = Math.floor(cHeight/16) * 4;
+var maxTopHeight = Math.floor(cHeight / 16) * 4;
 
 canvas.width = cWidth;
 canvas.height = cHeight;
+
 var ctx = canvas.getContext("2d");
 ctx.fillStyle = "#000000";
 
@@ -53,7 +48,7 @@ enemyCanvas.height = cHeight;
 var enemyCtx = enemyCanvas.getContext("2d");
 enemyCtx.fillStyle = "#000000";
 
-levelCanvas.width = cWidth+16;
+levelCanvas.width = cWidth + 16;
 levelCanvas.height = cHeight;
 var levelCtx = levelCanvas.getContext("2d");
 levelCtx.fillStyle = "#000000";
@@ -73,37 +68,22 @@ fireCanvas.height = cHeight;
 var fireCtx = fireCanvas.getContext("2d");
 fireCtx.fillStyle = "#000000";
 
-lightCanvas.width = cWidth;
-lightCanvas.height = cHeight;
-var lightCtx = lightCanvas.getContext("2d");
-lightCtx.fillStyle = "#000000";
-
-screenCanvas.width = cWidth;
-screenCanvas.height = cHeight;
-screenCtx.fillStyle = "#000000";
-
-glCanvas.width = cWidth;
-glCanvas.height = cHeight;
-
 var bGenX = 0;
-var bGenY = minBottomHeight-16;
+var bGenY = minBottomHeight - 16;
 
-var tGenY = minTopHeight+16;
+var tGenY = minTopHeight + 16;
 
 var SHIP_TYPE_PLAYER = 0;
 var SHIP_TYPE_ENEMY = 1;
-
-var gl = null;
 
 // key map
 var map = [];
 
 function backingScale(context) {
-    if ('devicePixelRatio' in window) {
-        if (window.devicePixelRatio > 1) {
-            return window.devicePixelRatio;
-		}
-	}
+    "use strict";
+    if (window.devicePixelRatio > 1) {
+        return window.devicePixelRatio;
+    }
     return 1;
 }
 
@@ -114,10 +94,9 @@ window.onload = function() {
 		canvas.width = canvas.width * scaleFactor;
 		canvas.height = canvas.height * scaleFactor;
 		// update the context for the new canvas scale
-		var ctx = canvas.getContext("2d");
+		ctx = canvas.getContext("2d");
 	}
 	
-	if(glSupport) initializeGL();
 	
 	playerShip = new Ship(15, cHeight/2, 67, 50, 0, 0, SHIP_TYPE_PLAYER);
 	generateFirst();
@@ -125,37 +104,8 @@ window.onload = function() {
 	
 	bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 	
-	lightCtx.globalCompositeOperation = "lighter";
-	var gradient = lightCtx.createLinearGradient(0, 0, 0, lightCanvas.height);
-	gradient.addColorStop(0, "rgba(0, 0, 0, 0.5)");
-	gradient.addColorStop(0.5, "rgba(0, 0, 0, 0)");
-	gradient.addColorStop(1, "rgba(0, 0, 0, 0.5)");
-	lightCtx.fillStyle = gradient;
-	lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
-	
-	window.requestAnimationFrame(renderOnScreen);
-	
 	gameIntervalId = setInterval(update, 1000/gameSpeed);
 };
-
-function initializeGL() {
-	gl = glCanvas.getContext("webgl") || glCanvas.getContext("experimental-webgl") || glCanvas.getContext("webkit-3d") || glCanvas.getContext("moz-webgl");
-  
-	if (!gl) {
-		alert("Unable to initialize WebGL. Your browser may not support it or it's disabled.");
-		return;
-	}
-	
-	gl.getSupportedExtensions();
-	
-    gl.viewportWidth = glCanvas.width;
-    gl.viewportHeight = glCanvas.height;		
-
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT);
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	
-}
 
 $(document).keydown(function(e) {
 	map[e.keyCode] = true;
@@ -172,22 +122,6 @@ $(document).keydown(function(e) {
         case 40:
             playerShip.speedY = gameSteps;
             break;
-        case 83:
-            // press S to slow game down
-            gameSpeed = (gameSpeed === 1 ? 45 : 1);
-            clearInterval(gameIntervalId);
-            gameIntervalId = setInterval(update, 1000/gameSpeed);
-            debugLog = !debugLog;
-            break;
-        case 80:
-            // press P for pause
-            if (gameIntervalId) {
-                clearInterval(gameIntervalId);
-                gameIntervalId = null;
-            } else {
-                gameIntervalId = setInterval(update, 1000/gameSpeed);
-            }
-            break;
         default:
             console.log("No key handler for " + e.keyCode);
     }
@@ -203,26 +137,6 @@ function update() {
 	generateLevel();
 	renderTiles();
 	renderShips();
-}
-
-function renderOnScreen() {
-	
-	if(!gl) {
-		screenCtx.clearRect(0, 0, screenCanvas.width, screenCanvas.height);
-		
-		screenCtx.drawImage(bgCanvas, 0, 0);
-		screenCtx.drawImage(fireCanvas, 0, 0);
-		screenCtx.drawImage(canvas, 0, 0);
-		screenCtx.drawImage(enemyCanvas, 0, 0);
-		screenCtx.drawImage(levelCanvas, 0, 0);
-		screenCtx.drawImage(fxCanvas, 0, 0);
-		screenCtx.drawImage(lightCanvas, 0, 0);		
-	}	
-	if(gl) {
-		//webGL code would go here
-	}
-	
-	window.requestAnimationFrame(renderOnScreen);
 }
 
 function renderTiles() {
@@ -304,7 +218,7 @@ function generateLevel() {
 		bGenY -= 16;
 	}	
 	
-	createTile(bGenX, bGenY+16, 0, 1);
+	createTile(bGenX, bGenY, 0, 1);
 	createTile(bGenX, bGenY+16, 1, 1);
 	createTile(bGenX, bGenY+32, 1, 3);
 	createTile(bGenX, bGenY+48, 1, 6);
